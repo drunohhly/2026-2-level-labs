@@ -3,7 +3,6 @@ Lab 1.
 
 Language detection
 """belloooo
-
 # pylint:disable=unused-argument
 from typing import Sequence
 
@@ -12,7 +11,6 @@ FreqDictType = dict[str, float]
 ProfileType = tuple[str, FreqDictType, int]
 "Language profile of a text. Contains language name, frequency dictionary and number of tokens."
 # Mark 4.
-
 
 def tokenize(text: str) -> Sequence[str] | None:
     """
