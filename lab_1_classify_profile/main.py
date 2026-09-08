@@ -13,22 +13,12 @@ ProfileType = tuple[str, FreqDictType, int]
 "Language profile of a text. Contains language name, frequency dictionary and number of tokens."
 # Mark 4.
 
-en_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\en.txt", "r", encoding="utf-8")
-de_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\de.txt", "r", encoding="utf-8")
-unk_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\unknown.txt", "r", encoding="utf-8")
-stop_words = open(r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\stopwords.txt", "r", encoding="utf-8")
+stopwords = open(r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\stopwords.txt", "r", encoding="utf-8")
 #закрыть файлы в конце
-stop_words = stop_words.read()
-stop_words = str(stop_words)
-stop_words = [word for word in stop_words.split()]
-print(stop_words)
+stopwords = stopwords.read()
+stopwords = str(stopwords)
+stopwords = [word for word in stopwords.split()]
 
-en_text = en_text.read()
-en_text = str(en_text)
-de_text = de_text.read()
-de_text = str(de_text)
-unk_text = unk_text.read()
-unk_text = str(unk_text)
 
 def tokenize(text: str) -> Sequence[str] | None:
     text = text.lower
@@ -36,13 +26,6 @@ def tokenize(text: str) -> Sequence[str] | None:
     text = re.sub(r"\d", "", text)
     tokens = [word for word in text.split()]
     return tokens
-
-tokenized_text1 = tokenize(en_text)
-print(tokenized_text1)
-tokenized_text2 = tokenize(de_text)
-print(tokenized_text2)
-tokenized_text3 = tokenize(unk_text)
-print(tokenized_text3)
 
 """
     Splits a text into tokens, converts the tokens into lowercase,
@@ -61,8 +44,7 @@ def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Seque
         cleaned_text = [word for word in tokens if word not in stop_words]
     return cleaned_text
 
-cleaned_text = remove_stop_words(tokenized_text1, stop_words)
-print(cleaned_text)
+
 
 """
     Removes stop words
@@ -92,8 +74,7 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
         dict[str, float] | None: Dictionary with frequencies.
         Returns None in case of incorrect input types.
     """
-frequency = calculate_frequencies(cleaned_text)
-print(frequency)
+
 
 def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | None:
     freq_dict_k = freq_dict.keys()
@@ -104,8 +85,7 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
     sorted_freq_list = [element[1] for element in sorted_freq_list]
     return sorted_freq_list
 
-top_n_words = get_top_n_words(frequency, 5)
-print(top_n_words)
+
 """
     Finds the most common words
 
