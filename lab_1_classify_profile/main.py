@@ -77,6 +77,11 @@ print(cleaned_text)
 
 
 def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
+    frequency = {}
+    for _ in tokens:
+        frequency[_] = frequency.get(_, 0) + 1
+    return frequency
+
     """
     Calculates frequencies of given tokens
 
@@ -86,7 +91,8 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
         dict[str, float] | None: Dictionary with frequencies.
         Returns None in case of incorrect input types.
     """
-
+frequency = calculate_frequencies(cleaned_text)
+print(frequency)
 
 def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | None:
     """
