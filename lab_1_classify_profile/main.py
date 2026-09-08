@@ -2,9 +2,10 @@
 Lab 1.
 
 Language detection
-"""belloooo
+"""
 # pylint:disable=unused-argument
 from typing import Sequence
+import re
 
 FreqDictType = dict[str, float]
 "Frequency dictionary. Contains pairs of token and its frequency."
@@ -12,8 +13,34 @@ ProfileType = tuple[str, FreqDictType, int]
 "Language profile of a text. Contains language name, frequency dictionary and number of tokens."
 # Mark 4.
 
+en_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\en.txt", "r", encoding="utf-8")
+de_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\de.txt", "r", encoding="utf-8")
+unk_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\unknown.txt", "r", encoding="utf-8")
+
+#закрыть файлы в конце
+
+
+en_text = en_text.read()
+en_text = str(en_text)
+de_text = de_text.read()
+de_text = str(de_text)
+unk_text = unk_text.read()
+unk_text = str(unk_text)
+
 def tokenize(text: str) -> Sequence[str] | None:
-    """
+    text = text.lower
+    text = re.sub(r"[^\w\s]", "", text()) #все символы, кроме букв, цифр и нижних подчеркиваний очищаются + кроме пробелов
+    text = re.sub(r"\d", "", text)
+    tokens = [word for word in text.split()]
+    return tokens
+
+tokenized_text1 = tokenize(en_text)
+print(tokenized_text1)
+tokenized_text2 = tokenize(de_text)
+print(tokenized_text2)
+tokenized_text3 = tokenize(unk_text)
+print(tokenized_text3)
+"""
     Splits a text into tokens, converts the tokens into lowercase,
     removes punctuation and other symbols from words
 

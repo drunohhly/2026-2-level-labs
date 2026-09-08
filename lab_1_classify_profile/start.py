@@ -1,6 +1,6 @@
 """
 Language detection starter.
-"""leleelel
+"""
 
 # pylint: disable=unused-variable, duplicate-code
 
