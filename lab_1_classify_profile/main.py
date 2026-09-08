@@ -78,8 +78,9 @@ print(cleaned_text)
 
 def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
     frequency = {}
+    overall_words = len(tokens)
     for _ in tokens:
-        frequency[_] = frequency.get(_, 0) + 1
+        frequency[_] = (frequency.get(_, 0) + 1) / overall_words
     return frequency
 
     """
@@ -95,6 +96,8 @@ frequency = calculate_frequencies(cleaned_text)
 print(frequency)
 
 def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | None:
+
+
     """
     Finds the most common words
 
