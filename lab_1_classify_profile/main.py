@@ -13,12 +13,15 @@ ProfileType = tuple[str, FreqDictType, int]
 "Language profile of a text. Contains language name, frequency dictionary and number of tokens."
 # Mark 4.
 
-en_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\en.txt", "r", encoding="utf-8")
-de_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\de.txt", "r", encoding="utf-8")
-unk_text = open ("D:\\prog\\2026-2-level-labs\\lab_1_classify_profile\\assets\\texts\\unknown.txt", "r", encoding="utf-8")
-
+en_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\en.txt", "r", encoding="utf-8")
+de_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\de.txt", "r", encoding="utf-8")
+unk_text = open (r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\texts\unknown.txt", "r", encoding="utf-8")
+stop_words = open(r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\stopwords.txt", "r", encoding="utf-8")
 #закрыть файлы в конце
-
+stop_words = stop_words.read()
+stop_words = str(stop_words)
+stop_words = [word for word in stop_words.split()]
+print(stop_words)
 
 en_text = en_text.read()
 en_text = str(en_text)
@@ -40,6 +43,7 @@ tokenized_text2 = tokenize(de_text)
 print(tokenized_text2)
 tokenized_text3 = tokenize(unk_text)
 print(tokenized_text3)
+
 """
     Splits a text into tokens, converts the tokens into lowercase,
     removes punctuation and other symbols from words
@@ -52,9 +56,15 @@ print(tokenized_text3)
         Returns None if input text is not a string.
     """
 
-
 def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Sequence[str] | None:
-    """
+    for _ in tokens:
+        cleaned_text = [word for word in tokens if word not in stop_words]
+    return cleaned_text
+
+cleaned_text = remove_stop_words(tokenized_text1, stop_words)
+print(cleaned_text)
+
+"""
     Removes stop words
 
     Args:
@@ -63,7 +73,7 @@ def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Seque
     Returns:
         Sequence[str] | None: Sequence of tokens without stop words.
         Returns None in case of incorrect input types.
-    """
+"""
 
 
 def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
