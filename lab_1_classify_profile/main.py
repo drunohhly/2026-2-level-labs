@@ -96,9 +96,17 @@ frequency = calculate_frequencies(cleaned_text)
 print(frequency)
 
 def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | None:
+    freq_dict_k = freq_dict.keys()
+    freq_dict_v = freq_dict.values()
+    freq_dict = zip(freq_dict_v, freq_dict_k)
+    sorted_freq_dict = sorted(freq_dict, key = lambda x: (-x[0], x[1]))
+    sorted_freq_list = list(sorted_freq_dict[:top_n])
+    sorted_freq_list = [element[1] for element in sorted_freq_list]
+    return sorted_freq_list
 
-
-    """
+top_n_words = get_top_n_words(frequency, 5)
+print(top_n_words)
+"""
     Finds the most common words
 
     Args:
