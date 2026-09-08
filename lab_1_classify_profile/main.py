@@ -21,11 +21,15 @@ stopwords = [word for word in stopwords.split()]
 
 
 def tokenize(text: str) -> Sequence[str] | None:
-    text = text.lower
-    text = re.sub(r"[^\w\s]", "", text()) #все символы, кроме букв, цифр и нижних подчеркиваний очищаются + кроме пробелов
-    text = re.sub(r"\d", "", text)
-    tokens = [word for word in text.split()]
-    return tokens
+    if isinstance(text, str) == False:
+            return None
+    else:
+        text = text.lower
+        text = re.sub(r"[^\w\s]", "", text()) #все символы, кроме букв, цифр и нижних подчеркиваний очищаются + кроме пробелов
+        text = re.sub(r"\d", "", text)
+        tokens = [word for word in text.split()]
+        return tokens
+
 
 """
     Splits a text into tokens, converts the tokens into lowercase,
@@ -40,9 +44,18 @@ def tokenize(text: str) -> Sequence[str] | None:
     """
 
 def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Sequence[str] | None:
-    for _ in tokens:
-        cleaned_text = [word for word in tokens if word not in stop_words]
-    return cleaned_text
+    if isinstance(tokens, list) == False or isinstance(stop_words, list) == False:
+                return None
+    for element in tokens:
+         if isinstance(element, str) == False:
+              return None
+    for _ in stop_words:
+             if isinstance(_, str) == False:
+                  return None
+    else:
+        for _ in tokens:
+            cleaned_text = [word for word in tokens if word not in stop_words]
+        return cleaned_text
 
 
 

@@ -12,6 +12,7 @@ from lab_1_classify_profile.main import tokenize
 @pytest.mark.mark6
 @pytest.mark.mark8
 @pytest.mark.mark10
+
 def test_tokenize_ideal() -> None:
     """
     Ideal tokenize scenario
