@@ -12,7 +12,14 @@ FreqDictType = dict[str, float]
 ProfileType = tuple[str, FreqDictType, int]
 "Language profile of a text. Contains language name, frequency dictionary and number of tokens."
 # Mark 4.
-
+with open("lab_1_classify_profile/assets/texts/de.txt", "r", encoding="utf-8") as file:
+        de_text = file.read()
+with open("lab_1_classify_profile/assets/texts/unknown.txt", "r", encoding="utf-8") as file:
+        unknown_text = file.read()
+with open("lab_1_classify_profile/assets/stopwords.txt", "r", encoding="utf-8") as file:
+        stopwords = file.read().split("\n")
+with open("lab_1_classify_profile/assets/texts/en.txt", "r", encoding="utf-8") as file:
+        en_text = file.read()
 stopwords = open(r"D:\prog\2026-2-level-labs\lab_1_classify_profile\assets\stopwords.txt", "r", encoding="utf-8")
 #закрыть файлы в конце
 stopwords = stopwords.read()
@@ -140,8 +147,54 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
 def create_language_profile(
     language: str, text: str, stop_words: Sequence[str]
 ) -> ProfileType | None:
-    """
-    Creates a language profile
+    if isinstance(language, str) != True or isinstance(text, str) != True or isinstance(stop_words, list) != True:
+         return None
+    else:
+        tokenized_text = tokenize(text)
+        if isinstance(tokenized_text, list) != True:
+             return None
+        for el in tokenized_text:
+                if isinstance(el, str) != True:
+                    return None
+
+        tokenized_text_without_stopwords = remove_stop_words(tokenized_text, stop_words)
+
+        if isinstance(tokenized_text_without_stopwords, list) != True:
+             return None
+        for element in tokenized_text_without_stopwords:
+             if isinstance(element, str) != True:
+                  return None
+
+        freq_dict = calculate_frequencies(tokenized_text_without_stopwords)
+
+        if isinstance(freq_dict, dict) != True:
+                 return None
+        for elem in freq_dict:
+            if isinstance(elem, str) != True or isinstance(freq_dict[elem], float) != True:
+                return None
+
+        else:
+            sorted_freq_dict = dict(sorted(freq_dict.items()))
+            #absolute frequency:
+            frequency = {}
+            for element in tokenized_text_without_stopwords:
+                if element not in frequency:
+                    frequency[element] = 1
+                else:
+                    frequency[element] = frequency[element] + 1
+            for element in frequency:
+                if frequency[element] == 1:
+                        freq_unique_list = [element for element in frequency]
+                        n_words = len(freq_unique_list)
+                        lang_profile = (language, sorted_freq_dict, n_words)
+                        return lang_profile
+
+smth = create_language_profile('de', "Ich weiß nicht was ich machen möchte. Vielleicht ich muss das überlegen", ['muss', 'das', 'was'])
+print(smth)
+
+
+"""
+Creates a language profile
 
     Args:
         language (str): Language name
