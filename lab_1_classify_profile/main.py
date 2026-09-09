@@ -72,13 +72,29 @@ def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Seque
 
 
 def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
-    frequency = {}
-    overall_words = len(tokens)
-    for _ in tokens:
-        frequency[_] = (frequency.get(_, 0) + 1) / overall_words
-    return frequency
+    if isinstance(tokens, list) == False:
+         return None
+    for element in tokens:
+         if isinstance(element, str) == False:
+              return None
+    else:
+        frequency = {}
+        overall_words = len(tokens)
+        for element in tokens:
+            if element not in frequency:
+                frequency[element] = 1
+            else:
+                frequency[element] = frequency[element] + 1
+        for element in frequency:
+            frequency[element] = frequency[element] / overall_words
+        return frequency
 
-    """
+third_funk = calculate_frequencies(["weather", "sunny", "man", "happy", "weather"])
+print(third_funk)
+
+
+
+"""
     Calculates frequencies of given tokens
 
     Args:
@@ -90,13 +106,19 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
 
 
 def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | None:
-    freq_dict_k = freq_dict.keys()
-    freq_dict_v = freq_dict.values()
-    freq_dict = zip(freq_dict_v, freq_dict_k)
-    sorted_freq_dict = sorted(freq_dict, key = lambda x: (-x[0], x[1]))
-    sorted_freq_list = list(sorted_freq_dict[:top_n])
-    sorted_freq_list = [element[1] for element in sorted_freq_list]
-    return sorted_freq_list
+    if isinstance(freq_dict, dict) != True or isinstance(top_n, int) != True or top_n <= 0:
+         return None
+    for element in freq_dict:
+         if isinstance(element, str) != True or isinstance(freq_dict[element], float) != True:
+              return None
+    else:
+        freq_dict_k = freq_dict.keys()
+        freq_dict_v = freq_dict.values()
+        freq_dict = zip(freq_dict_v, freq_dict_k)
+        sorted_freq_dict = sorted(freq_dict, key = lambda x: (-x[0], x[1]))
+        sorted_freq_list = list(sorted_freq_dict[:top_n])
+        sorted_freq_list = [element[1] for element in sorted_freq_list]
+        return sorted_freq_list
 
 
 """
