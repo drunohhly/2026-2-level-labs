@@ -309,7 +309,26 @@ def calculate_mse(predicted: Sequence[float], actual: Sequence[float]) -> float 
         Returns None in case of incorrect input types or mismatched length.
         In case of empty inputs, returns 0.0.
     """
-
+    if isinstance(predicted, list) == False or isinstance(actual, list) == False:
+        return None
+    if len(predicted) != len(actual):
+        return None
+    if len(predicted) == 0 or len(actual) == 0:
+        return 0.0
+    for element in predicted:
+        if isinstance(element, float) != True:
+            return None
+    for el in actual:
+        if isinstance(el, float) != True:
+            return None
+    list_of_diffs = []
+    for elem in actual:
+        index_actual = actual.index(elem)
+        diff = (elem-predicted[index_actual])**2
+        list_of_diffs.append(diff)
+    sum_of_diffs = sum(list_of_diffs)
+    mse = sum_of_diffs / (len(actual))
+    return mse
 
 def compare_profiles_by_mse(
     unknown_profile: ProfileType, profile_to_compare: ProfileType
