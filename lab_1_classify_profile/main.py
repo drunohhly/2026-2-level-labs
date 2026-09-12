@@ -345,6 +345,33 @@ def compare_profiles_by_mse(
         float | None: The distance between the profiles.
         In case of corrupt input arguments or invalid profile structure, None is returned.
     """
+    checked_unknown_profile = check_profile(unknown_profile)
+    checked_second_profile = check_profile (profile_to_compare)
+    if checked_second_profile == False or checked_unknown_profile == False:
+        return None
+    list_of_unk = []
+    list_of_second = []
+    list_of_tokens = []
+    for element in unknown_profile[1]:
+        list_of_tokens.append(element)
+        list_of_unk.append(element)
+    for el in profile_to_compare[1]:
+            list_of_tokens.append(el)
+            list_of_second.append(el)
+    list_of_mse_unk = []
+    for elem in list_of_tokens:
+        if elem in list_of_unk:
+            list_of_mse_unk.append(unknown_profile[1][elem])
+        else:
+            list_of_mse_unk.append(0.0)
+    list_of_mse_sec = []
+    for ele in list_of_tokens:
+            if ele in list_of_second:
+                list_of_mse_sec.append(profile_to_compare[1][ele])
+            else:
+                list_of_mse_sec.append(0.0)
+    result = calculate_mse(list_of_mse_unk, list_of_mse_sec)
+    return result
 
 
 def detect_language_by_mse(
