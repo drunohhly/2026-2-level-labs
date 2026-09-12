@@ -128,6 +128,18 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
 def create_language_profile(
     language: str, text: str, stop_words: Sequence[str]
 ) -> ProfileType | None:
+    """
+    Creates a language profile
+
+    Args:
+        language (str): Language name
+        text (str): Text
+        stop_words (Sequence[str]): Sequence of stop words (can be empty)
+
+    Returns:
+        ProfileType | None: Language profile.
+        Returns None in case of incorrect input types.
+    """
     if isinstance(language, str) != True or isinstance(text, str) != True or isinstance(stop_words, list) != True:
          return None
     else:
@@ -170,35 +182,8 @@ def create_language_profile(
                         lang_profile = (language, sorted_freq_dict, n_words)
                         return lang_profile
 
-
-
-"""
-Creates a language profile
-
-    Args:
-        language (str): Language name
-        text (str): Text
-        stop_words (Sequence[str]): Sequence of stop words (can be empty)
-
-    Returns:
-        ProfileType | None: Language profile.
-        Returns None in case of incorrect input types.
-    """
-
-
 def check_profile(profile: ProfileType) -> bool:
-    if  isinstance(profile, tuple) != True:
-         return False
-    elif isinstance(profile[0], str) != True:
-        return False
-    elif isinstance(profile[1], dict) != True:
-        return False
-    elif isinstance(profile[2], int) != True:
-        return False
-    else:
-         return True
-
-"""
+    """
     Checks profile structure
 
     Args:
@@ -208,7 +193,23 @@ def check_profile(profile: ProfileType) -> bool:
         bool: Returns True if the profile has right structure and types,
         otherwise returns False.
     """
-
+    if  isinstance(profile, tuple) != True:
+         return False
+    if len(profile) != 3:
+        return False
+    if isinstance(profile[0], str) != True:
+        return False
+    if isinstance(profile[1], dict) != True:
+        return False
+    for element in profile[1]:
+        if isinstance(element, str) != True:
+            return False
+        if isinstance(profile[1][element], float) != True:
+            return False
+    if isinstance(profile[2], int) != True:
+        return False
+    else:
+         return True
 
 def compare_profiles_by_top_n(
     unknown_profile: ProfileType, profile_to_compare: ProfileType, top_n: int
