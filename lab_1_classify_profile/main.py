@@ -225,6 +225,31 @@ def compare_profiles_by_top_n(
         float | None: The distance between profiles.
         Returns None in case of incorrect input types.
     """
+    checked_unknown_profile = check_profile(unknown_profile)
+    checked_second_profile = check_profile (profile_to_compare)
+    if checked_second_profile == False or checked_unknown_profile == False:
+        return None
+    if isinstance(top_n, int) != True:
+        return None
+    if top_n <= 0:
+        return None
+    else:
+        freq_dict_unk = unknown_profile[1]
+        freq_dict_sec = profile_to_compare[1]
+        top_words_unk = get_top_n_words(freq_dict_unk, top_n)
+        if isinstance(top_words_unk, list) != True:
+            return None
+        top_words_sec = get_top_n_words(freq_dict_sec, top_n)
+        if isinstance(top_words_sec, list) != True:
+                    return None
+        list_of_common_words = [word for word in top_words_unk if word in top_words_sec]
+        num_of_common_words = len(list_of_common_words)
+        num_of_unk_words = len(top_words_unk)
+        proportion_of_overlapping_words = num_of_common_words / num_of_unk_words
+        return proportion_of_overlapping_words
+
+
+
 
 
 def detect_language_by_top_n(
