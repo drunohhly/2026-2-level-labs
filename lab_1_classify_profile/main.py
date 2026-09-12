@@ -248,10 +248,6 @@ def compare_profiles_by_top_n(
         proportion_of_overlapping_words = num_of_common_words / num_of_unk_words
         return proportion_of_overlapping_words
 
-
-
-
-
 def detect_language_by_top_n(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType, top_n: int
 ) -> str | None:
@@ -268,6 +264,33 @@ def detect_language_by_top_n(
         str | None: Unknown profile language.
         Returns None in case of incorrect input types.
     """
+    if isinstance(top_n, int) != True:
+        return None
+    if top_n <= 0:
+        return None
+    checked_unk_profile = check_profile(unknown_profile)
+    if checked_unk_profile == False:
+        return None
+    checked_first_profile = check_profile(profile_1)
+    if checked_first_profile == False:
+        return None
+    checked_sec_profile = check_profile(profile_2)
+    if checked_sec_profile == False:
+        return None
+    checked_1 = compare_profiles_by_top_n(unknown_profile, profile_1, top_n)
+    if isinstance(checked_1, float) != True:
+        return None
+    checked_2 = compare_profiles_by_top_n(unknown_profile, profile_2, top_n)
+    if isinstance(checked_2, float) != True:
+            return None
+    if checked_1 > checked_2:
+        return profile_1[0]
+    if checked_1 < checked_2:
+            return profile_2[0]
+    if checked_2 == checked_1:
+        list_of_langs = [profile_1[0], profile_2[0]]
+        sorted_list = sorted(list_of_langs)
+        return sorted_list[0]
 
 
 # Mark 8
