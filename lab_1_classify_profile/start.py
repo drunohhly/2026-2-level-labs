@@ -10,6 +10,9 @@ from main import get_top_n_words
 from main import create_language_profile
 from main import check_profile
 from main import detect_language_by_top_n
+from main import calculate_mse
+from main import compare_profiles_by_mse
+from main import detect_language_by_mse
 
 def main() -> None:
     """
@@ -38,8 +41,9 @@ def main() -> None:
         result_2 = None
     else:
         result_2 = detect_language_by_top_n(unk_profile, en_profile, de_profile, 15)
+        result_3 = detect_language_by_mse(unk_profile, en_profile, de_profile)
     assert result, "Detection result is None"
-    return result, result_2
+    return result, result_2, result_3
 
 
 result = main()

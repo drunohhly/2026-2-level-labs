@@ -321,13 +321,13 @@ def calculate_mse(predicted: Sequence[float], actual: Sequence[float]) -> float 
     for el in actual:
         if isinstance(el, float) != True:
             return None
-    list_of_diffs = []
-    for elem in actual:
-        index_actual = actual.index(elem)
-        diff = (elem-predicted[index_actual])**2
-        list_of_diffs.append(diff)
-    sum_of_diffs = sum(list_of_diffs)
-    mse = sum_of_diffs / (len(actual))
+    dict_of_values = dict(zip(actual, predicted))
+    diffs = []
+    for elem in dict_of_values:
+        diff = (elem - dict_of_values[elem])**2
+        diffs.append(diff)
+    summ = sum(diffs)
+    mse = summ / len(actual)
     return mse
 
 def compare_profiles_by_mse(
@@ -356,7 +356,8 @@ def compare_profiles_by_mse(
         list_of_tokens.append(element)
         list_of_unk.append(element)
     for el in profile_to_compare[1]:
-            list_of_tokens.append(el)
+            if el not in list_of_tokens:
+                list_of_tokens.append(el)
             list_of_second.append(el)
     list_of_mse_unk = []
     for elem in list_of_tokens:
@@ -372,7 +373,6 @@ def compare_profiles_by_mse(
                 list_of_mse_sec.append(0.0)
     result = calculate_mse(list_of_mse_unk, list_of_mse_sec)
     return result
-
 
 def detect_language_by_mse(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType
@@ -390,7 +390,29 @@ def detect_language_by_mse(
         str | None: Unknown profile language.
         Returns None in case of incorrect input types.
     """
-
+    checked_unk_profile = check_profile(unknown_profile)
+    if checked_unk_profile == False:
+        return None
+    checked_first_profile = check_profile(profile_1)
+    if checked_first_profile == False:
+        return None
+    checked_sec_profile = check_profile(profile_2)
+    if checked_sec_profile == False:
+        return None
+    mse_unk_and_one = compare_profiles_by_mse(unknown_profile, profile_1)
+    if isinstance(mse_unk_and_one, float) != True:
+        return None
+    mse_unk_and_two = compare_profiles_by_mse(unknown_profile, profile_2)
+    if isinstance(mse_unk_and_two, float) != True:
+            return None
+    if mse_unk_and_one > mse_unk_and_two:
+        return profile_2[0]
+    if mse_unk_and_one < mse_unk_and_two:
+        return profile_1[0]
+    if mse_unk_and_one == mse_unk_and_two:
+        list_of_langs = [profile_1[0], profile_2[0]]
+        sorted_list = sorted(list_of_langs)
+        return sorted_list[0]
 
 # Mark 10
 
