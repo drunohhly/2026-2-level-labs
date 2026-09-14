@@ -44,7 +44,11 @@ print(float(7))  # convert int to float → 7.0
 
 
 # TASKS
-
+a = 1
+b = 3
+powii = pow(a, b)
+print(abs(-1))
+print(powii)
 
 # Task 1:
 def add_numbers(a: int, b: int) -> int:
@@ -58,8 +62,10 @@ def add_numbers(a: int, b: int) -> int:
     Returns:
         int: Sum of a and b
     """
-    # student implementation goes here
-
+    c = a + b
+    return c
+summ = add_numbers(2, 3)
+print(summ)
 
 # add_numbers(2, 3) → 5
 # add_numbers(-5, 10) → 5
@@ -79,9 +85,9 @@ def average(a: float, b: float, c: float) -> float:
     Returns:
         float: Average value of the three numbers
     """
-    # student implementation goes here
+    return (a + b + c)/3
 
-
+print(average(1, 2, 3))
 # average(1, 2, 3) → 2.0
 # average(10, 20, 30) → 20.0
 # average(5.5, 6.5, 7.5) → 6.5
@@ -98,8 +104,12 @@ def is_even(n: int) -> bool:
     Returns:
         bool: True if n is even, False otherwise
     """
-    # student implementation goes here
-
+    if n % 2 == 0:
+        return True
+    else:
+        return False
+even = (is_even(0))
+print(even)
 
 # is_even(2) → True
 # is_even(3) → False
@@ -118,8 +128,8 @@ def area_of_circle(radius: float) -> float:
     Returns:
         float: Area of the circle
     """
-    # student implementation goes here
-
+    return 3.14 * radius ** 2
+print(area_of_circle(0))
 
 # area_of_circle(1) → 3.14159...
 # area_of_circle(0) → 0
@@ -137,7 +147,12 @@ def factorial(n: int) -> int:
     Returns:
         int: Factorial of n
     """
-    # student implementation goes here
+    listt = [0]
+    a = 0
+    if n>=a:
+        a += 1
+        listt.append()
+
 
 
 # factorial(0) → 1

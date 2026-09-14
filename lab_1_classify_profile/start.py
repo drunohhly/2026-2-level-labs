@@ -10,8 +10,6 @@ from main import get_top_n_words
 from main import create_language_profile
 from main import check_profile
 from main import detect_language_by_top_n
-from main import calculate_mse
-from main import compare_profiles_by_mse
 from main import detect_language_by_mse
 
 def main() -> None:
@@ -34,16 +32,14 @@ def main() -> None:
     unk_profile = create_language_profile("unknown", unknown_text, stopwords)
     de_profile = create_language_profile("de", de_text, stopwords)
     en_profile = create_language_profile("en", en_text, stopwords)
-    checked_unk_profile = check_profile(unk_profile)
-    checked_de_profile = check_profile(de_profile)
-    checked_en_profile = check_profile(en_profile)
-    if checked_unk_profile == False or checked_de_profile == False or checked_en_profile == False:
-        result_2 = None
+    checks = [check_profile(unk_profile), check_profile(de_profile), check_profile(en_profile)]
+    if not all(checks):
+        result = None
     else:
-        result_2 = detect_language_by_top_n(unk_profile, en_profile, de_profile, 15)
-        result_3 = detect_language_by_mse(unk_profile, en_profile, de_profile)
+        result = detect_language_by_top_n(unk_profile, en_profile, de_profile, 15)
+        result = detect_language_by_mse(unk_profile, en_profile, de_profile)
     assert result, "Detection result is None"
-    return result, result_2, result_3
+    return result
 
 
 result = main()
