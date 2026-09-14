@@ -4,8 +4,9 @@ Lab 1.
 Language detection
 """
 # pylint:disable=unused-argument
-from typing import Sequence
 import re
+
+from typing import Sequence
 
 FreqDictType = dict[str, float]
 "Frequency dictionary. Contains pairs of token and its frequency."
