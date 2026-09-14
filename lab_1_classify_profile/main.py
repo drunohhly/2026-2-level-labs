@@ -101,7 +101,7 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
     """
     checks = [isinstance(freq_dict, dict), isinstance(top_n, int), top_n >0]
     if not all(checks):
-             return None
+        return None
     for key, value in freq_dict.items():
         if not (isinstance(key, str) and (isinstance(value, float))):
             return None
@@ -134,13 +134,13 @@ def create_language_profile(
     """
     checks = [isinstance(language, str), isinstance(text, str), isinstance(stop_words, list)]
     if not all(checks):
-         return None
-    checks_2 = [isinstance(tokenize(text), list),
-                isinstance(remove_stop_words(tokenize(text), stop_words), list),
-                isinstance(calculate_frequencies(remove_stop_words(tokenize(text), stop_words)), dict)]
+        return None
     tokenized_text = tokenize(text)
     tokenized_text_without_stopwords = remove_stop_words(tokenized_text, stop_words)
     freq_dict = calculate_frequencies(tokenized_text_without_stopwords)
+    checks_2 = [isinstance(tokenized_text, list),
+                isinstance(tokenized_text_without_stopwords, list),
+                isinstance(freq_dict, dict)]
     if not all(checks_2):
         return None
     for el in tokenized_text:
@@ -173,7 +173,9 @@ def check_profile(profile: ProfileType) -> bool:
         return False
     if not len(profile) == 3:
         return False
-    checks = [isinstance(profile[0], str), isinstance(profile[1], dict), isinstance(profile[2], int)]
+    checks = [isinstance(profile[0], str),
+              isinstance(profile[1], dict),
+              isinstance(profile[2], int)]
     if not all (checks):
         return False
     for keys, values in profile[1].items():
@@ -213,8 +215,7 @@ def compare_profiles_by_top_n(
     list_of_common_words = [word for word in top_words_unk if word in top_words_sec]
     num_of_common_words = len(list_of_common_words)
     num_of_unk_words = len(top_words_unk)
-    proportion_of_overlapping_words = num_of_common_words / num_of_unk_words
-    return proportion_of_overlapping_words
+    return num_of_common_words / num_of_unk_words
 
 def detect_language_by_top_n(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType, top_n: int
@@ -237,14 +238,15 @@ def detect_language_by_top_n(
     checks = [check_profile(unknown_profile), check_profile(profile_1), check_profile(profile_2)]
     if not all(checks):
         return None
-    compared = [compare_profiles_by_top_n(unknown_profile, profile_1, top_n), compare_profiles_by_top_n(unknown_profile, profile_2, top_n)]
+    compared = [compare_profiles_by_top_n(unknown_profile, profile_1, top_n),
+                compare_profiles_by_top_n(unknown_profile, profile_2, top_n)]
     for element in compared:
         if not isinstance(element, float):
             return None
     if compared[0] > compared[1]:
         return profile_1[0]
     if compared[0] < compared[1]:
-            return profile_2[0]
+        return profile_2[0]
     if compared[0] == compared[1]:
         list_of_langs = [profile_1[0], profile_2[0]]
         sorted_list = sorted(list_of_langs)
@@ -304,7 +306,8 @@ def compare_profiles_by_mse(
         float | None: The distance between the profiles.
         In case of corrupt input arguments or invalid profile structure, None is returned.
     """
-    checks = [check_profile(unknown_profile), check_profile (profile_to_compare)]
+    checks = [check_profile(unknown_profile),
+              check_profile (profile_to_compare)]
     if not all(checks):
         return None
     list_of_unk = []
@@ -329,8 +332,7 @@ def compare_profiles_by_mse(
             list_of_mse_sec.append(profile_to_compare[1][ele])
         else:
             list_of_mse_sec.append(0.0)
-    result = calculate_mse(list_of_mse_unk, list_of_mse_sec)
-    return result
+    return calculate_mse(list_of_mse_unk, list_of_mse_sec)
 
 def detect_language_by_mse(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType
