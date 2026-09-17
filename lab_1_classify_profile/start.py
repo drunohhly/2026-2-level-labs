@@ -6,11 +6,13 @@ Language detection starter.
 from main import (
                 calculate_frequencies,
                 check_profile,
+                collect_profiles,
                 create_language_profile,
                 detect_language_by_mse,
                 detect_language_by_top_n,
                 get_top_n_words,
                 remove_stop_words,
+                save_profile,
                 tokenize)
 
 def main() -> None:
@@ -35,9 +37,16 @@ def main() -> None:
     checks = [check_profile(unk_profile), check_profile(de_profile), check_profile(en_profile)]
     if not all(checks):
         result = None
+    print(get_top_n_words(calculated_frequencies, 7))
     print(detect_language_by_top_n(unk_profile, en_profile, de_profile, 15))
     print(detect_language_by_mse(unk_profile, en_profile, de_profile))
-    result = get_top_n_words(calculated_frequencies, 7)
+    save_profile(unk_profile, 'lab_1_classify_profile/assets/profiles')
+    save_profile(de_profile, 'lab_1_classify_profile/assets/profiles')
+    save_profile(en_profile, 'lab_1_classify_profile/assets/profiles')
+    list_of_paths = ['lab_1_classify_profile/assets/profiles/unknown.json',
+                     'lab_1_classify_profile/assets/profiles/de.json',
+                     'lab_1_classify_profile/assets/profiles/en.json']
+    result = collect_profiles(list_of_paths)
     assert result, "Detection result is None"
     return result
 

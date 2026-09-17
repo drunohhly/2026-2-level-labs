@@ -4,8 +4,9 @@ Lab 1.
 Language detection
 """
 # pylint:disable=unused-argument
+import json
+import os
 import re
-
 from typing import Sequence
 
 FreqDictType = dict[str, float]
@@ -109,7 +110,7 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
     freq_dict_k = freq_dict.keys()
     freq_dict_v = freq_dict.values()
     freq_dict = zip(freq_dict_v, freq_dict_k)
-    sorted_freq_dict = sorted(freq_dict, key = lambda x: (-x[0], x[1]))
+    sorted_freq_dict = sorted(freq_dict, key=lambda x: (-x[0], x[1]))
     sorted_freq_list = list(sorted_freq_dict[:top_n])
     sorted_freq_list = [element[1] for element in sorted_freq_list]
     return sorted_freq_list
@@ -157,7 +158,7 @@ def create_language_profile(
     for el in freq_dict:
         freq_dict[el] = freq_dict[el] * len(tokenized_text_without_stopwords)
     n_words = len(freq_dict)
-    return language, freq_dict, n_words
+    return (language, freq_dict, n_words)
 
 def check_profile(profile: ProfileType) -> bool:
     """
@@ -373,6 +374,8 @@ def detect_language_by_mse(
 
 def save_profile(profile: ProfileType, save_path: str) -> bool:
     """
+
+
     Saves a language profile
 
     Args:
@@ -383,7 +386,25 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
         bool: False in case of incorrect input types or if the profile
         is missing obligatory keys. True if the profile is saved.
     """
-
+    if not check_profile(profile):
+        return False
+    if not (isinstance(save_path, str)):
+        return False
+    if not os.path.isdir(save_path):
+        os.makedirs(save_path)
+    file_name = f"{profile[0]}.json"
+    path = os.path.join(save_path, file_name)
+    profile = {
+        "name": profile[0],
+        "freq": profile[1],
+        "n_words": profile[2]
+    }
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(profile, file, indent=4, ensure_ascii=False)
+    if os.path.exists(path):
+        return True
+    else:
+        return False
 
 def load_profile(path_to_file: str) -> ProfileType | None:
     """
@@ -396,7 +417,19 @@ def load_profile(path_to_file: str) -> ProfileType | None:
         ProfileType | None: Loaded profile.
         Returns None in case of incorrect input types.
     """
-
+    if not isinstance(path_to_file, str):
+        return None
+    with open(path_to_file, "r", encoding="utf-8") as file:
+        file_1 = json.load(file)
+    if not isinstance(file_1, dict):
+        return None
+    profile = []
+    for element in file_1:
+        profile.append(file_1[element])
+    profile = tuple(profile)
+    if not check_profile(profile):
+            return None
+    return profile
 
 def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] | None:
     """
@@ -409,6 +442,15 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         Sequence[ProfileType] | None: Sequence of loaded profiles.
         Returns None in case of incorrect input types.
     """
+    if not (isinstance(paths_to_profiles, list)):
+        return None
+    list_of_profs = []
+    for element in paths_to_profiles:
+        if (isinstance(element, str)):
+            if check_profile(load_profile(element)):
+                list_of_profs.append(load_profile(element))
+                return list_of_profs
+    return None
 
 
 def detect_language_advanced(
@@ -429,6 +471,29 @@ def detect_language_advanced(
         The sequence is sorted by best MSE value, then by best Top-N value.
         Returns None in case of incorrect input types.
     """
+    checks = [isinstance(unknown_profile, tuple),
+            isinstance(known_profiles, list),
+            isinstance(top_n, int), check_profile(unknown_profile)]
+    if not (all(checks)
+        and top_n>0):
+            return None
+    full_list = []
+    for element in known_profiles:
+        if not check_profile(element):
+            return None
+        compared_by_mse = compare_profiles_by_mse(unknown_profile, element)
+        compared_by_top_n = compare_profiles_by_top_n(unknown_profile, element, top_n)
+        if not (isinstance(compared_by_top_n, float)
+                and isinstance(compared_by_mse, float)):
+            return None
+        dicts = {"MSE": compared_by_mse,
+                "Top-N": compared_by_top_n}
+        prof = (element[0], dicts)
+        full_list.append(prof)
+    sorted_list = sorted(full_list, key=lambda x:
+                        (x[1]["MSE"], -x[1]["Top-N"]))
+    return sorted_list
+
 
 
 def print_report(
