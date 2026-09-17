@@ -248,9 +248,9 @@ def detect_language_by_top_n(
             return None
     if compared[0] > compared[1]:
         return profile_1[0]
-    if compared[0] < compared[1]:
+    elif compared[0] < compared[1]:
         return profile_2[0]
-    if compared[0] == compared[1]:
+    else:
         list_of_langs = [profile_1[0], profile_2[0]]
         sorted_list = sorted(list_of_langs)
         return sorted_list[0]
@@ -335,8 +335,7 @@ def compare_profiles_by_mse(
             list_of_mse_sec.append(profile_to_compare[1][ele])
         else:
             list_of_mse_sec.append(0.0)
-    result = calculate_mse(list_of_mse_unk, list_of_mse_sec)
-    return result
+    return calculate_mse(list_of_mse_unk, list_of_mse_sec)
 
 def detect_language_by_mse(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType
@@ -364,9 +363,9 @@ def detect_language_by_mse(
             return None
     if checks_2[0] > checks_2[1]:
         return profile_2[0]
-    if checks_2[0] < checks_2[1]:
+    elif checks_2[0] < checks_2[1]:
         return profile_1[0]
-    if checks_2[0] == checks_2[1]:
+    else:
         list_of_langs = [profile_1[0], profile_2[0]]
         sorted_list = sorted(list_of_langs)
         return sorted_list[0]

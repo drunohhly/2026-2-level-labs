@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "[LAB 1] Start",
             "type": "debugpy",
             "request": "launch",
@@ -22,9 +29,11 @@
             "module": "quality_control.run_tests",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "args":[
-                "--pr-name", "test",
-                "--pr-author", "test"
+            "args": [
+                "--pr-name",
+                "test",
+                "--pr-author",
+                "test"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
@@ -37,7 +46,7 @@
             "module": "quality_control.spellcheck.check_spelling",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "args":[],
+            "args": [],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
@@ -49,7 +58,7 @@
             "module": "quality_control.spellcheck.sort_wordlist",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "args":[],
+            "args": [],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
@@ -71,7 +80,8 @@
             "request": "launch",
             "program": "quality_control.github.update_forks",
             "args": [
-                "--config", "config/github/update_fork_config.json"
+                "--config",
+                "config/github/update_fork_config.json"
             ],
             "console": "integratedTerminal",
             "env": {

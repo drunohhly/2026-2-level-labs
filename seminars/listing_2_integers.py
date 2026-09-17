@@ -147,11 +147,6 @@ def factorial(n: int) -> int:
     Returns:
         int: Factorial of n
     """
-    listt = [0]
-    a = 0
-    if n>=a:
-        a += 1
-        listt.append()
 
 
 

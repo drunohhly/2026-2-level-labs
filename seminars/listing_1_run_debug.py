@@ -31,6 +31,10 @@ print(f"Numbers: {first_num} and {second_num}")
 # Fix the first exception:
 second_num = 6
 third_num = first_num / second_num
+a = 1
+b = 3
+powii = pow(a, b)
+print(powii)
 print(f"Numbers: {first_num}, {second_num} and {third_num}")
 
 
