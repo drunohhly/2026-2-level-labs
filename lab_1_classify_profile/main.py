@@ -217,7 +217,8 @@ def compare_profiles_by_top_n(
     list_of_common_words = [word for word in top_words_unk if word in top_words_sec]
     num_of_common_words = len(list_of_common_words)
     num_of_unk_words = len(top_words_unk)
-    return num_of_common_words / num_of_unk_words
+    result = num_of_common_words / num_of_unk_words
+    return result
 
 def detect_language_by_top_n(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType, top_n: int
@@ -334,7 +335,8 @@ def compare_profiles_by_mse(
             list_of_mse_sec.append(profile_to_compare[1][ele])
         else:
             list_of_mse_sec.append(0.0)
-    return calculate_mse(list_of_mse_unk, list_of_mse_sec)
+    result = calculate_mse(list_of_mse_unk, list_of_mse_sec)
+    return result
 
 def detect_language_by_mse(
     unknown_profile: ProfileType, profile_1: ProfileType, profile_2: ProfileType
@@ -388,7 +390,7 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
     """
     if not check_profile(profile):
         return False
-    if not (isinstance(save_path, str)):
+    if not isinstance(save_path, str):
         return False
     if not os.path.isdir(save_path):
         os.makedirs(save_path)
@@ -403,8 +405,7 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
         json.dump(profile, file, indent=4, ensure_ascii=False)
     if os.path.exists(path):
         return True
-    else:
-        return False
+    return False
 
 def load_profile(path_to_file: str) -> ProfileType | None:
     """
@@ -428,7 +429,7 @@ def load_profile(path_to_file: str) -> ProfileType | None:
         profile.append(file_1[element])
     profile = tuple(profile)
     if not check_profile(profile):
-            return None
+        return None
     return profile
 
 def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] | None:
@@ -442,11 +443,11 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         Sequence[ProfileType] | None: Sequence of loaded profiles.
         Returns None in case of incorrect input types.
     """
-    if not (isinstance(paths_to_profiles, list)):
+    if not isinstance(paths_to_profiles, list):
         return None
     list_of_profs = []
     for element in paths_to_profiles:
-        if (isinstance(element, str)):
+        if isinstance(element, str):
             if check_profile(load_profile(element)):
                 list_of_profs.append(load_profile(element))
                 return list_of_profs
@@ -476,7 +477,7 @@ def detect_language_advanced(
             isinstance(top_n, int), check_profile(unknown_profile)]
     if not (all(checks)
         and top_n>0):
-            return None
+        return None
     full_list = []
     for element in known_profiles:
         if not check_profile(element):
