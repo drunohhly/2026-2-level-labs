@@ -101,7 +101,7 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
         Sequence[str] | None: Sequence of the most common words.
         Returns None in case of incorrect input types or non-positive top_n.
     """
-    checks = [isinstance(freq_dict, dict), isinstance(top_n, int), top_n >0]
+    checks = [isinstance(freq_dict, dict), isinstance(top_n, int), top_n>0]
     if not all(checks):
         return None
     for key, value in freq_dict.items():
@@ -510,3 +510,44 @@ def print_report(
 
     In case of incorrect type inputs, does not print anything.
     """
+    checks = [check_profile(unknown_profile), isinstance(metrics_stats, list), isinstance(top_n, int)]
+    if not all(checks):
+        return None
+    if top_n<=0:
+        return None
+    for i in metrics_stats:
+        if not isinstance(i, tuple):
+            return None
+        for l in i[0]:
+            if not isinstance(l, str):
+                return None
+        for k in i[1]:
+            if not (isinstance(k, str)
+                    and isinstance(i[1][k], float)):
+                return None
+
+    pop_words = get_top_n_words(unknown_profile[1], top_n)
+    list_of_tokens = []
+    for element in unknown_profile[1]:
+        list_of_tokens.append(element)
+    list_of_nums = []
+    for el in list_of_tokens:
+        list_of_nums.append(len(el))
+    max_len = max(list_of_nums)
+    word_of_max_len = list_of_tokens[list_of_nums.index(max_len)]
+    min_len = min(list_of_nums)
+    word_of_min_len = list_of_tokens[list_of_nums.index(min_len)]
+    summ = sum(list_of_nums)
+    av_len = round(summ / len(list_of_tokens), 5)
+    print("Unknown language stats")
+    print("======================")
+    print(f"Popular words: {pop_words}")
+    print(f"Max length word: '{word_of_max_len}'")
+    print(f"Min length word: '{word_of_min_len}'")
+    print(f"Average token length: {av_len:.5f}")
+    print()
+    print("Language scores")
+    print("---------------")
+    for ele in metrics_stats:
+        print(f"{ele[0]}: MSE {ele[1]["MSE"]:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
+
