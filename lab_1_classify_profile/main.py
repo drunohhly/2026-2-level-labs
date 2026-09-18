@@ -248,7 +248,7 @@ def detect_language_by_top_n(
             return None
     if compared[0] > compared[1]:
         return profile_1[0]
-    elif compared[0] < compared[1]:
+    if compared[0] < compared[1]:
         return profile_2[0]
     else:
         list_of_langs = [profile_1[0], profile_2[0]]
@@ -363,7 +363,7 @@ def detect_language_by_mse(
             return None
     if checks_2[0] > checks_2[1]:
         return profile_2[0]
-    elif checks_2[0] < checks_2[1]:
+    if checks_2[0] < checks_2[1]:
         return profile_1[0]
     else:
         list_of_langs = [profile_1[0], profile_2[0]]
@@ -510,8 +510,9 @@ def print_report(
 
     In case of incorrect type inputs, does not print anything.
     """
-    checks = [check_profile(unknown_profile), isinstance(metrics_stats, list), isinstance(top_n, int)]
-    if not all(checks):
+    if not all([check_profile(unknown_profile),
+              isinstance(metrics_stats, list),
+              isinstance(top_n, int)]):
         return None
     if top_n<=0:
         return None
@@ -525,7 +526,6 @@ def print_report(
             if not (isinstance(k, str)
                     and isinstance(i[1][k], float)):
                 return None
-
     pop_words = get_top_n_words(unknown_profile[1], top_n)
     list_of_tokens = []
     for element in unknown_profile[1]:
@@ -533,12 +533,9 @@ def print_report(
     list_of_nums = []
     for el in list_of_tokens:
         list_of_nums.append(len(el))
-    max_len = max(list_of_nums)
-    word_of_max_len = list_of_tokens[list_of_nums.index(max_len)]
-    min_len = min(list_of_nums)
-    word_of_min_len = list_of_tokens[list_of_nums.index(min_len)]
-    summ = sum(list_of_nums)
-    av_len = round(summ / len(list_of_tokens), 5)
+    word_of_max_len = list_of_tokens[list_of_nums.index(max(list_of_nums))]
+    word_of_min_len = list_of_tokens[list_of_nums.index(min(list_of_nums))]
+    av_len = round(sum(list_of_nums) / len(list_of_tokens), 5)
     print("Unknown language stats")
     print("======================")
     print(f"Popular words: {pop_words}")
@@ -550,4 +547,4 @@ def print_report(
     print("---------------")
     for ele in metrics_stats:
         print(f"{ele[0]}: MSE {ele[1]["MSE"]:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
-
+    return None
