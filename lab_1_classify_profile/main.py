@@ -420,16 +420,17 @@ def detect_language_by_mse(
                 check_profile(profile_2)]):
         return None
 
-    compared_profiles = [compare_profiles_by_mse(unknown_profile, profile_1),
-                        compare_profiles_by_mse(unknown_profile, profile_2)]
-    for element in compared_profiles:
-        if not isinstance(element, float):
-            return None
+    compared_1 = compare_profiles_by_mse(unknown_profile, profile_1)
+    compared_2 = compare_profiles_by_mse(unknown_profile, profile_2)
 
-    if compared_profiles[0] > compared_profiles[1]:
+    if (compared_1 is None
+        or compared_2 is None):
+        return None
+
+    if compared_1 > compared_2:
         return profile_2[0]
 
-    if compared_profiles[0] < compared_profiles[1]:
+    if compared_1 < compared_2:
         return profile_1[0]
 
     list_of_langs = [profile_1[0], profile_2[0]]
@@ -522,8 +523,9 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         if not isinstance(element, str):
             return None
 
-        if load_profile(element):
-            list_of_profs.append(load_profile(element))
+        prof = load_profile(element)
+        if prof is not None:
+            list_of_profs.append(prof)
 
     for item in list_of_profs:
         if not check_profile(item):
