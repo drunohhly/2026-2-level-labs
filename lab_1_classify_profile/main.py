@@ -6,7 +6,6 @@ Language detection
 
 # pylint:disable=unused-argument
 import json
-import os
 import re
 from typing import Sequence
 
@@ -460,11 +459,8 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
     if not isinstance(save_path, str):
         return False
 
-    if not os.path.isdir(save_path):
-        os.makedirs(save_path)
-
     file_name = f"{profile[0]}.json"
-    path = os.path.join(save_path, file_name)
+    path = (f"{save_path}/{file_name}")
     profile = {
         "name": profile[0],
         "freq": profile[1],
@@ -473,10 +469,7 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
     with open(path, "w", encoding="utf-8") as file:
         json.dump(profile, file, indent=4, ensure_ascii=False)
 
-    if os.path.exists(path):
-        return True
-
-    return False
+    return True
 
 
 def load_profile(path_to_file: str) -> ProfileType | None:
