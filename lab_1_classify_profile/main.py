@@ -159,26 +159,21 @@ def create_language_profile(
         return None
 
     tokenized_text = tokenize(text)
+    if not tokenized_text:
+        return None
+
     tokenized_text_without_stopwords = remove_stop_words(tokenized_text, stop_words)
+    if not tokenized_text_without_stopwords:
+        return None
+
     freq_dict = calculate_frequencies(tokenized_text_without_stopwords)
+    if not freq_dict:
+        return None
 
     if not all([isinstance(tokenized_text, list),
                 isinstance(tokenized_text_without_stopwords, list),
                 isinstance(freq_dict, dict)]):
         return None
-
-    for el in tokenized_text:
-        if not isinstance(el, str):
-            return None
-
-    for element in tokenized_text_without_stopwords:
-        if not isinstance(element, str):
-            return None
-
-    for elem in freq_dict:
-        if not all([isinstance(elem, str),
-                    isinstance(freq_dict[elem], float)]):
-            return None
 
     for el in freq_dict:
         freq_dict[el] = freq_dict[el] * len(tokenized_text_without_stopwords)
@@ -245,12 +240,18 @@ def compare_profiles_by_top_n(
     top_words_unk = get_top_n_words(freq_dict_unk, top_n)
     top_words_sec = get_top_n_words(freq_dict_sec, top_n)
 
-    if not all([isinstance(top_words_unk, list),
-               isinstance(top_words_sec, list)]):
+    if not ((isinstance(top_words_unk, list)
+            or isinstance(top_words_unk, tuple))
+            and (isinstance(top_words_sec, list)
+            or isinstance(top_words_sec, tuple))):
         return None
 
     list_of_common_words = [word for word in top_words_unk if word in top_words_sec]
+
+    if not list_of_common_words:
+        num_of_common_words = 0
     num_of_common_words = len(list_of_common_words)
+
     num_of_unk_words = len(top_words_unk)
     result = num_of_common_words / num_of_unk_words
 
@@ -276,23 +277,23 @@ def detect_language_by_top_n(
     if not isinstance(top_n, int):
         return None
 
-    if not all([check_profile(unknown_profile),
-                check_profile(profile_1),
-                check_profile(profile_2),
-                top_n>0]):
+    if not (check_profile(unknown_profile)
+            and check_profile(profile_1)
+            and check_profile(profile_2)
+            and top_n>0):
         return None
 
-    compared = [compare_profiles_by_top_n(unknown_profile, profile_1, top_n),
-                compare_profiles_by_top_n(unknown_profile, profile_2, top_n)]
+    compared_1 = compare_profiles_by_top_n(unknown_profile, profile_1, top_n)
+    compared_2 = compare_profiles_by_top_n(unknown_profile, profile_2, top_n)
 
-    for element in compared:
-        if not isinstance(element, float):
-            return None
+    if (compared_1 is None
+        or compared_2 is None):
+        return None
 
-    if compared[0] > compared[1]:
+    if compared_1 > compared_2:
         return profile_1[0]
 
-    if compared[0] < compared[1]:
+    if compared_1 < compared_2:
         return profile_2[0]
 
     list_of_langs = [profile_1[0], profile_2[0]]
@@ -460,14 +461,14 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
         return False
 
     file_name = f"{profile[0]}.json"
-    path = (f"{save_path}/{file_name}")
-    profile = {
+    path = f"{save_path}/{file_name}"
+    lang_profile = {
         "name": profile[0],
         "freq": profile[1],
         "n_words": profile[2]
     }
     with open(path, "w", encoding="utf-8") as file:
-        json.dump(profile, file, indent=4, ensure_ascii=False)
+        json.dump(lang_profile, file, indent=4, ensure_ascii=False)
 
     return True
 
@@ -496,11 +497,11 @@ def load_profile(path_to_file: str) -> ProfileType | None:
     for element in file_with_lang_profile:
         profile.append(file_with_lang_profile[element])
 
-    profile = tuple(profile)
-    if not check_profile(profile):
+    lang_profile = tuple(profile)
+    if not check_profile(lang_profile):
         return None
 
-    return profile
+    return lang_profile
 
 
 def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] | None:
