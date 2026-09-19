@@ -50,8 +50,10 @@ def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Seque
         Sequence[str] | None: Sequence of tokens without stop words.
         Returns None in case of incorrect input types.
     """
-    if not all([isinstance(tokens, list),
-                isinstance(stop_words, list)]):
+    if not all([any([isinstance(tokens, list),
+                    isinstance(tokens, tuple)]),
+                any([isinstance(stop_words, list),
+                     isinstance(stop_words, tuple)])]):
         return None
 
     for element in tokens:
@@ -77,7 +79,8 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
         dict[str, float] | None: Dictionary with frequencies.
         Returns None in case of incorrect input types.
     """
-    if not isinstance(tokens, list):
+    if not any([isinstance(tokens, list),
+                isinstance(tokens, tuple)]):
         return None
 
     for element in tokens:
@@ -110,8 +113,10 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
         Returns None in case of incorrect input types or non-positive top_n.
     """
     if not all([isinstance(freq_dict, dict),
-                isinstance(top_n, int),
-                top_n>0]):
+                isinstance(top_n, int)]):
+        return None
+
+    if top_n<=0:
         return None
 
     for key, value in freq_dict.items():
@@ -121,9 +126,9 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
 
     freq_dict_k = freq_dict.keys()
     freq_dict_v = freq_dict.values()
-    freq_dict = zip(freq_dict_v, freq_dict_k)
-    sorted_freq_dict = sorted(freq_dict, key=lambda x: (-x[0], x[1]))
-    sorted_freq_list = list(sorted_freq_dict[:top_n])
+    freq_tuples = zip(freq_dict_v, freq_dict_k)
+    sorted_freq_tuples = sorted(freq_tuples, key=lambda x: (-x[0], x[1]))
+    sorted_freq_list = list(sorted_freq_tuples[:top_n])
     sorted_freq_list = [element[1] for element in sorted_freq_list]
 
     return sorted_freq_list
@@ -149,7 +154,8 @@ def create_language_profile(
     """
     if not all([isinstance(language, str),
                 isinstance(text, str),
-                isinstance(stop_words, list)]):
+                any([isinstance(stop_words, list),
+                    isinstance(stop_words, tuple)])]):
         return None
 
     tokenized_text = tokenize(text)
@@ -267,7 +273,10 @@ def detect_language_by_top_n(
         str | None: Unknown profile language.
         Returns None in case of incorrect input types.
     """
-    if not isinstance(top_n, int) or top_n <= 0:
+    if not isinstance(top_n, int):
+        return None
+
+    if top_n <= 0:
         return None
 
     if not all([check_profile(unknown_profile),
@@ -310,8 +319,10 @@ def calculate_mse(predicted: Sequence[float], actual: Sequence[float]) -> float 
         Returns None in case of incorrect input types or mismatched length.
         In case of empty inputs, returns 0.0.
     """
-    if not all([isinstance(predicted, list),
-                isinstance(actual, list)]):
+    if not all([any([isinstance(predicted, list),
+                    isinstance(predicted, tuple)]),
+                    any([isinstance(actual, list),
+                    isinstance(actual, tuple)])]):
         return None
 
     if len(predicted) != len(actual):
@@ -382,9 +393,9 @@ def compare_profiles_by_mse(
             list_of_mse_unk.append(0.0)
 
     list_of_mse_sec = []
-    for ele in list_of_tokens:
-        if ele in list_of_second:
-            list_of_mse_sec.append(profile_to_compare[1][ele])
+    for item in list_of_tokens:
+        if item in list_of_second:
+            list_of_mse_sec.append(profile_to_compare[1][item])
         else:
             list_of_mse_sec.append(0.0)
 
@@ -511,17 +522,24 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         Sequence[ProfileType] | None: Sequence of loaded profiles.
         Returns None in case of incorrect input types.
     """
-    if not isinstance(paths_to_profiles, list):
+    if not any([isinstance(paths_to_profiles, list),
+                isinstance(paths_to_profiles, tuple)]):
         return None
 
     list_of_profs = []
     for element in paths_to_profiles:
-        if isinstance(element, str):
-            if check_profile(load_profile(element)):
-                list_of_profs.append(load_profile(element))
-                return list_of_profs
+        if not isinstance(element, str):
+            return None
 
-    return None
+        if load_profile(element):
+            list_of_profs.append(load_profile(element))
+
+    for item in list_of_profs:
+        if not check_profile(item):
+            return None
+
+    return list_of_profs
+
 
 
 def detect_language_advanced(
@@ -543,12 +561,13 @@ def detect_language_advanced(
         Returns None in case of incorrect input types.
     """
     if not all([isinstance(unknown_profile, tuple),
-            isinstance(known_profiles, list),
+            any([isinstance(known_profiles, list),
+                isinstance(known_profiles, tuple)]),
             isinstance(top_n, int),
             check_profile(unknown_profile)]):
         return None
 
-    if not top_n>0:
+    if top_n<=0:
         return None
 
     full_list = []
@@ -556,16 +575,16 @@ def detect_language_advanced(
         if not check_profile(element):
             return None
 
-    compared_by_mse = compare_profiles_by_mse(unknown_profile, element)
-    compared_by_top_n = compare_profiles_by_top_n(unknown_profile, element, top_n)
-    if not (isinstance(compared_by_top_n, float)
-            and isinstance(compared_by_mse, float)):
-        return None
+        compared_by_mse = compare_profiles_by_mse(unknown_profile, element)
+        compared_by_top_n = compare_profiles_by_top_n(unknown_profile, element, top_n)
+        if not (isinstance(compared_by_top_n, float)
+                and isinstance(compared_by_mse, float)):
+            return None
 
-    dicts = {"MSE": compared_by_mse,
-            "Top-N": compared_by_top_n}
-    prof = (element[0], dicts)
-    full_list.append(prof)
+        dicts = {"MSE": compared_by_mse,
+                "Top-N": compared_by_top_n}
+        prof = (element[0], dicts)
+        full_list.append(prof)
 
     sorted_list = sorted(full_list, key=lambda x:
                         (x[1]["MSE"], -x[1]["Top-N"]))
@@ -588,7 +607,8 @@ def print_report(
     In case of incorrect type inputs, does not print anything.
     """
     if not all([check_profile(unknown_profile),
-              isinstance(metrics_stats, list),
+              any([isinstance(metrics_stats, list),
+                   isinstance(metrics_stats, tuple)]),
               isinstance(top_n, int)]):
         return None
 
