@@ -3,6 +3,7 @@ Lab 1.
 
 Language detection
 """
+
 # pylint:disable=unused-argument
 import json
 import os
@@ -91,7 +92,7 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
     overall_words = len(tokens)
     for element in tokens:
         if element not in frequency:
-            frequency[element] = 1
+            frequency[element] = 1.0
         else:
             frequency[element] = frequency[element] + 1
     for element in frequency:
@@ -129,9 +130,9 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
     freq_tuples = zip(freq_dict_v, freq_dict_k)
     sorted_freq_tuples = sorted(freq_tuples, key=lambda x: (-x[0], x[1]))
     sorted_freq_list = list(sorted_freq_tuples[:top_n])
-    sorted_freq_list = [element[1] for element in sorted_freq_list]
+    sorted_list = [element[1] for element in sorted_freq_list]
 
-    return sorted_freq_list
+    return sorted_list
 
 
 # Mark 6.
