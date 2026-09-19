@@ -15,7 +15,7 @@ from lab_1_classify_profile.main import (
     print_report,
     remove_stop_words,
     save_profile,
-    tokenize
+    tokenize,
 )
 
 
