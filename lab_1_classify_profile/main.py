@@ -16,7 +16,6 @@ ProfileType = tuple[str, FreqDictType, int]
 # Mark 4.
 
 
-
 def tokenize(text: str) -> Sequence[str] | None:
     """
     Splits a text into tokens, converts the tokens into lowercase,
@@ -134,16 +133,16 @@ def create_language_profile(
         ProfileType | None: Language profile.
         Returns None in case of incorrect input types.
     """
-    checks = [isinstance(language, str), isinstance(text, str), isinstance(stop_words, list)]
-    if not all(checks):
+    if not all([isinstance(language, str),
+                isinstance(text, str),
+                isinstance(stop_words, list)]):
         return None
     tokenized_text = tokenize(text)
     tokenized_text_without_stopwords = remove_stop_words(tokenized_text, stop_words)
     freq_dict = calculate_frequencies(tokenized_text_without_stopwords)
-    checks_2 = [isinstance(tokenized_text, list),
+    if not all([isinstance(tokenized_text, list),
                 isinstance(tokenized_text_without_stopwords, list),
-                isinstance(freq_dict, dict)]
-    if not all(checks_2):
+                isinstance(freq_dict, dict)]):
         return None
     for el in tokenized_text:
         if not isinstance(el, str):
@@ -152,8 +151,8 @@ def create_language_profile(
         if not isinstance(element, str):
             return None
     for elem in freq_dict:
-        checks_3 = [isinstance(elem, str), isinstance(freq_dict[elem], float) ]
-        if not all(checks_3):
+        if not all([isinstance(elem, str),
+                    isinstance(freq_dict[elem], float)]):
             return None
     for el in freq_dict:
         freq_dict[el] = freq_dict[el] * len(tokenized_text_without_stopwords)
@@ -175,10 +174,9 @@ def check_profile(profile: ProfileType) -> bool:
         return False
     if not len(profile) == 3:
         return False
-    checks = [isinstance(profile[0], str),
+    if not all ([isinstance(profile[0], str),
               isinstance(profile[1], dict),
-              isinstance(profile[2], int)]
-    if not all (checks):
+              isinstance(profile[2], int)]):
         return False
     for keys, values in profile[1].items():
         if not (isinstance(keys, str) and isinstance(values, float)):
@@ -199,8 +197,8 @@ def compare_profiles_by_top_n(
         float | None: The distance between profiles.
         Returns None in case of incorrect input types.
     """
-    checks = [check_profile(unknown_profile), check_profile (profile_to_compare)]
-    if not all(checks):
+    if not all([check_profile(unknown_profile),
+                check_profile (profile_to_compare)]):
         return None
     if not isinstance(top_n, int):
         return None
@@ -238,8 +236,9 @@ def detect_language_by_top_n(
     """
     if not isinstance(top_n, int) or top_n <= 0:
         return None
-    checks = [check_profile(unknown_profile), check_profile(profile_1), check_profile(profile_2)]
-    if not all(checks):
+    if not all([check_profile(unknown_profile),
+                check_profile(profile_1),
+                check_profile(profile_2)]):
         return None
     compared = [compare_profiles_by_top_n(unknown_profile, profile_1, top_n),
                 compare_profiles_by_top_n(unknown_profile, profile_2, top_n)]
@@ -272,8 +271,8 @@ def calculate_mse(predicted: Sequence[float], actual: Sequence[float]) -> float 
         Returns None in case of incorrect input types or mismatched length.
         In case of empty inputs, returns 0.0.
     """
-    checks = [isinstance(predicted, list), isinstance(actual, list)]
-    if not all(checks):
+    if not all([isinstance(predicted, list),
+                isinstance(actual, list)]):
         return None
     if len(predicted) != len(actual):
         return None
@@ -353,8 +352,9 @@ def detect_language_by_mse(
         str | None: Unknown profile language.
         Returns None in case of incorrect input types.
     """
-    checks = [check_profile(unknown_profile), check_profile(profile_1), check_profile(profile_2)]
-    if not all(checks):
+    if not all([check_profile(unknown_profile),
+                check_profile(profile_1),
+                check_profile(profile_2)]):
         return None
     checks_2 = [compare_profiles_by_mse(unknown_profile, profile_1),
                 compare_profiles_by_mse(unknown_profile, profile_2)]
@@ -375,8 +375,6 @@ def detect_language_by_mse(
 
 def save_profile(profile: ProfileType, save_path: str) -> bool:
     """
-
-
     Saves a language profile
 
     Args:
@@ -471,10 +469,10 @@ def detect_language_advanced(
         The sequence is sorted by best MSE value, then by best Top-N value.
         Returns None in case of incorrect input types.
     """
-    checks = [isinstance(unknown_profile, tuple),
+    if not (all([isinstance(unknown_profile, tuple),
             isinstance(known_profiles, list),
-            isinstance(top_n, int), check_profile(unknown_profile)]
-    if not (all(checks)
+            isinstance(top_n, int),
+            check_profile(unknown_profile)])
         and top_n>0):
         return None
     full_list = []
