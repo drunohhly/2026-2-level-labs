@@ -276,12 +276,10 @@ def detect_language_by_top_n(
     if not isinstance(top_n, int):
         return None
 
-    if top_n <= 0:
-        return None
-
     if not all([check_profile(unknown_profile),
                 check_profile(profile_1),
-                check_profile(profile_2)]):
+                check_profile(profile_2),
+                top_n>0]):
         return None
 
     compared = [compare_profiles_by_top_n(unknown_profile, profile_1, top_n),
