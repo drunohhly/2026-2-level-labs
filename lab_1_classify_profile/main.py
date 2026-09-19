@@ -240,10 +240,8 @@ def compare_profiles_by_top_n(
     top_words_unk = get_top_n_words(freq_dict_unk, top_n)
     top_words_sec = get_top_n_words(freq_dict_sec, top_n)
 
-    if not ((isinstance(top_words_unk, list)
-            or isinstance(top_words_unk, tuple))
-            and (isinstance(top_words_sec, list)
-            or isinstance(top_words_sec, tuple))):
+    if not (isinstance(top_words_unk, (list, tuple))
+            and isinstance(top_words_sec, (list, tuple))):
         return None
 
     list_of_common_words = [word for word in top_words_unk if word in top_words_sec]
