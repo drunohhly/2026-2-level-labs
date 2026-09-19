@@ -5,7 +5,6 @@ Language detection starter.
 # pylint: disable=unused-variable, duplicate-code
 from lab_1_classify_profile.main import (
     calculate_frequencies,
-    check_profile,
     collect_profiles,
     create_language_profile,
     detect_language_advanced,
@@ -35,10 +34,14 @@ def main() -> None:
     result = None
 
     tokenized_text = tokenize(de_text)
-    if tokenized_text is not None:
-        text_without_stopwords = remove_stop_words(tokenized_text, stopwords)
-        if text_without_stopwords is not None:
-            calculated_frequencies = calculate_frequencies(text_without_stopwords)
+    if tokenized_text is None:
+        return None
+
+    text_without_stopwords = remove_stop_words(tokenized_text, stopwords)
+    if text_without_stopwords is None:
+        return None
+
+    calculated_frequencies = calculate_frequencies(text_without_stopwords)
     if calculated_frequencies is None:
         return None
 
@@ -75,7 +78,6 @@ def main() -> None:
     print_report(unk_profile, advanced_detection, 15)
 
     assert result, "Detection result is None"
-    return result
 
 if __name__ == "__main__":
-    print(main())
+    main()
