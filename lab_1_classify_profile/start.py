@@ -35,17 +35,21 @@ def main() -> None:
     result = None
 
     tokenized_text = tokenize(de_text)
-    text_without_stopwords = remove_stop_words(tokenized_text, stopwords)
-    calculated_frequencies = calculate_frequencies(text_without_stopwords)
+    if tokenized_text is not None:
+        text_without_stopwords = remove_stop_words(tokenized_text, stopwords)
+        if text_without_stopwords is not None:
+            calculated_frequencies = calculate_frequencies(text_without_stopwords)
+    if calculated_frequencies is None:
+        return None
 
     unk_profile = create_language_profile("unknown", unknown_text, stopwords)
     de_profile = create_language_profile("de", de_text, stopwords)
     en_profile = create_language_profile("en", en_text, stopwords)
 
-    if not all([check_profile(unk_profile),
-                check_profile(de_profile),
-                check_profile(en_profile)]):
-        result = None
+    if (unk_profile is None
+        or de_profile is None
+        or en_profile is None):
+        return None
 
     result = get_top_n_words(calculated_frequencies, 7)
     print(detect_language_by_top_n(unk_profile, en_profile, de_profile, 15))
@@ -60,7 +64,14 @@ def main() -> None:
                      'lab_1_classify_profile/assets/profiles/en.json']
     collected_profiles = collect_profiles(list_of_paths)
 
+    if collected_profiles is None:
+        return None
+
     advanced_detection = detect_language_advanced(unk_profile, collected_profiles, 15)
+
+    if advanced_detection is None:
+        return None
+
     print_report(unk_profile, advanced_detection, 15)
 
     assert result, "Detection result is None"
