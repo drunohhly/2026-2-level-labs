@@ -179,7 +179,7 @@ def create_language_profile(
         freq_dict[el] = freq_dict[el] * len(tokenized_text_without_stopwords)
     n_words = len(freq_dict)
 
-    return (language, freq_dict, n_words)
+    return language, freq_dict, n_words
 
 
 def check_profile(profile: ProfileType) -> bool:
@@ -281,17 +281,17 @@ def detect_language_by_top_n(
             and top_n>0):
         return None
 
-    compared_1 = compare_profiles_by_top_n(unknown_profile, profile_1, top_n)
-    compared_2 = compare_profiles_by_top_n(unknown_profile, profile_2, top_n)
+    compared_unk_n_1 = compare_profiles_by_top_n(unknown_profile, profile_1, top_n)
+    compared_unk_n_2 = compare_profiles_by_top_n(unknown_profile, profile_2, top_n)
 
-    if (compared_1 is None
-        or compared_2 is None):
+    if (compared_unk_n_1 is None
+        or compared_unk_n_2 is None):
         return None
 
-    if compared_1 > compared_2:
+    if compared_unk_n_1 > compared_unk_n_2:
         return profile_1[0]
 
-    if compared_1 < compared_2:
+    if compared_unk_n_1 < compared_unk_n_2:
         return profile_2[0]
 
     list_of_langs = [profile_1[0], profile_2[0]]
@@ -560,7 +560,7 @@ def detect_language_advanced(
             check_profile(unknown_profile)]):
         return None
 
-    if top_n<=0:
+    if top_n <= 0:
         return None
 
     full_list = []
@@ -574,8 +574,10 @@ def detect_language_advanced(
                 and isinstance(compared_by_mse, float)):
             return None
 
-        dicts = {"MSE": compared_by_mse,
-                "Top-N": compared_by_top_n}
+        dicts = {
+            "MSE": compared_by_mse,
+            "Top-N": compared_by_top_n
+            }
         prof = (element[0], dicts)
         full_list.append(prof)
 
