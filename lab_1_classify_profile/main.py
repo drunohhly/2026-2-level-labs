@@ -91,11 +91,8 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
     overall_words = len(tokens)
     for element in tokens:
         if element not in frequency:
-            frequency[element] = 1.0
-        else:
-            frequency[element] = frequency[element] + 1
-    for element in frequency:
-        frequency[element] = frequency[element] / overall_words
+            frequency[element] = 0.0
+        frequency[element] += 1 / overall_words
 
     return frequency
 

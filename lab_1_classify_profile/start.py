@@ -54,15 +54,15 @@ def main() -> None:
         or en_profile is None):
         return
 
-    result = get_top_n_words(calculated_frequencies, 7)
+    print(get_top_n_words(calculated_frequencies, 7))
     print(detect_language_by_top_n(unk_profile, en_profile, de_profile, 15))
-    print(detect_language_by_mse(unk_profile, en_profile, de_profile))
+    result = detect_language_by_mse(unk_profile, en_profile, de_profile)
 
     save_profile(unk_profile, 'lab_1_classify_profile/assets/profiles')
     save_profile(de_profile, 'lab_1_classify_profile/assets/profiles')
     save_profile(en_profile, 'lab_1_classify_profile/assets/profiles')
 
-    list_of_paths = ['lab_1_classify_profile/assets/profiles/unknown.json',
+    list_of_paths = ['lab_1_classify_profile/assets/profiles/la.json',
                      'lab_1_classify_profile/assets/profiles/de.json',
                      'lab_1_classify_profile/assets/profiles/en.json']
     collected_profiles = collect_profiles(list_of_paths)
