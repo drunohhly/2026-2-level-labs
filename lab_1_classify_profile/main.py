@@ -498,18 +498,14 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         return None
 
     for element in paths_to_profiles:
-        if not isinstance(element, str):
-            return None
+            if not isinstance(element, str):
+                return None
 
-    list_of_profs = [
-        load_profile(path)
-        for path in paths_to_profiles
-        if load_profile(path) is not None
-    ]
-
-    for item in list_of_profs:
-        if item is None:
-            return None
+    list_of_profs = []
+    for element in paths_to_profiles:
+        prof = load_profile(element)
+        if prof is not None:
+            list_of_profs.append(prof)
 
     for item in list_of_profs:
         if not check_profile(item):
