@@ -5,11 +5,15 @@ Language detection starter.
 # pylint: disable=unused-variable, duplicate-code, too-many-return-statements
 from lab_1_classify_profile.main import (
     calculate_frequencies,
-    check_profile,
+    collect_profiles,
     create_language_profile,
+    detect_language_advanced,
+    detect_language_by_mse,
     detect_language_by_top_n,
     get_top_n_words,
+    print_report,
     remove_stop_words,
+    save_profile,
     tokenize,
 )
 
@@ -26,51 +30,56 @@ def main() -> None:
         stopwords = file.read().split("\n")
     with open("lab_1_classify_profile/assets/texts/en.txt", "r", encoding="utf-8") as file:
         en_text = file.read()
+
     result = None
 
-    tokens = tokenize(de_text)
-    if not isinstance(tokens, (list, tuple)):
+    tokenized_text = tokenize(de_text)
+    if tokenized_text is None:
         return None
-    print("Токены:", tokens)
 
-
-    clean_tokens = remove_stop_words(tokens, stopwords)
-    if not isinstance(clean_tokens, (list, tuple)):
+    text_without_stopwords = remove_stop_words(tokenized_text, stopwords)
+    if text_without_stopwords is None:
         return None
-    print("Токены без стоп-слов:", clean_tokens)
 
-    freq_dict = calculate_frequencies(clean_tokens)
-    if not isinstance(freq_dict, dict):
+    calculated_frequencies = calculate_frequencies(text_without_stopwords)
+    if calculated_frequencies is None:
         return None
-    print("Частотный словарь:", freq_dict)
 
-    top_7 = get_top_n_words(freq_dict, 7)
-    if not isinstance(top_7, (list, tuple)):
-        return None
-    print("Топ-7 популярных слов текста:", top_7)
-
+    unk_profile = create_language_profile("unknown", unknown_text, stopwords)
     de_profile = create_language_profile("de", de_text, stopwords)
     en_profile = create_language_profile("en", en_text, stopwords)
-    unknown_profile = create_language_profile("unknown", unknown_text, stopwords)
 
-    if not (isinstance(de_profile, tuple)
-            and isinstance(en_profile, tuple)
-            and isinstance(unknown_profile, tuple)):
+    if (unk_profile is None
+        or de_profile is None
+        or en_profile is None):
         return None
-    print("de_profile валиден:", check_profile(de_profile))
-    print("en_profile валиден:", check_profile(en_profile))
-    print("unknown_profile валиден:", check_profile(unknown_profile))
 
-    detected_language = detect_language_by_top_n(
-        unknown_profile, de_profile, en_profile, 15
-    )
-    if not isinstance(detected_language, str):
+    print(get_top_n_words(calculated_frequencies, 7))
+    print(detect_language_by_top_n(unk_profile, en_profile, de_profile, 15))
+    result = detect_language_by_mse(unk_profile, en_profile, de_profile)
+
+    save_profile(unk_profile, 'lab_1_classify_profile/assets/profiles')
+    save_profile(de_profile, 'lab_1_classify_profile/assets/profiles')
+    save_profile(en_profile, 'lab_1_classify_profile/assets/profiles')
+
+    list_of_paths = ['lab_1_classify_profile/assets/profiles/la.json',
+                     'lab_1_classify_profile/assets/profiles/de.json',
+                     'lab_1_classify_profile/assets/profiles/en.json']
+    collected_profiles = collect_profiles(list_of_paths)
+
+    if collected_profiles is None:
         return None
-    print("Язык:", detected_language)
+
+    advanced_detection = detect_language_advanced(unk_profile, collected_profiles, 15)
+
+    if advanced_detection is None:
+        return None
+
+    print_report(unk_profile, advanced_detection, 15)
+
 
     assert result, "Detection result is None"
     return None
-
 
 if __name__ == "__main__":
     main()
