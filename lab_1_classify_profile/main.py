@@ -32,8 +32,7 @@ def tokenize(text: str) -> Sequence[str] | None:
         return None
 
     text = text.lower()
-    text = re.sub(r"[^\w\s]", "", text)
-    text = re.sub(r"\d", "", text)
+    text = re.sub(r"[^\w\s]|\d", "", text)
     tokens = list(text.split())
 
     return tokens
