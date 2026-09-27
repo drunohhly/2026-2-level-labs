@@ -58,7 +58,7 @@ def remove_stop_words(tokens: Sequence[str], stop_words: Sequence[str]) -> Seque
         return None
 
     if not all(isinstance(i, str) for i in stop_words):
-            return None
+        return None
 
     cleaned_text = [word for word in tokens if word not in stop_words]
 
@@ -475,10 +475,7 @@ def load_profile(path_to_file: str) -> ProfileType | None:
     if not isinstance(file_with_lang_profile, dict):
         return None
 
-    profile = tuple([
-        file_with_lang_profile[i]
-        for i in file_with_lang_profile
-    ])
+    profile = tuple(file_with_lang_profile.values())
 
     if not check_profile(profile):
         return None
@@ -509,6 +506,9 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         for path in paths_to_profiles
         if load_profile(path) is not None
     ]
+
+    if not all(isinstance(i, tuple) for i in list_of_profs):
+        return None
 
     for item in list_of_profs:
         if not check_profile(item):
