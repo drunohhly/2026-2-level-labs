@@ -32,7 +32,8 @@ def tokenize(text: str) -> Sequence[str] | None:
         return None
 
     text = text.lower()
-    text = re.sub(r"[^\w\s]\d", "", text)
+    text = re.sub(r"[^\w\s]", "", text)
+    text = re.sub(r"\d", "", text)
     tokens = list(text.split())
 
     return tokens
@@ -112,7 +113,7 @@ def get_top_n_words(freq_dict: dict[str, float], top_n: int) -> Sequence[str] | 
                 isinstance(top_n, int)]):
         return None
 
-    if top_n <= 0:
+    if top_n<=0:
         return None
 
     for key, value in freq_dict.items():
@@ -340,7 +341,10 @@ def calculate_mse(predicted: Sequence[float], actual: Sequence[float]) -> float 
         diff = (elem[0] - elem[1])**2
         diffs.append(diff)
 
-    return sum(diffs) / len(actual)
+    summ = sum(diffs)
+    mse = summ / len(actual)
+
+    return mse
 
 
 def compare_profiles_by_mse(
@@ -464,6 +468,21 @@ def save_profile(profile: ProfileType, save_path: str) -> bool:
 
     return True
 
+profile = (
+            "de",
+            {
+                "hause": 0.1,
+                "auslande": 0.1,
+                "man": 0.6,
+                "an": 0.4,
+                "freunde": 0.1,
+                "bin": 0.1,
+                "gute": 0.1,
+                "minuten": 0.1,
+            },
+            8,
+        )
+
 
 def load_profile(path_to_file: str) -> ProfileType | None:
     """
@@ -557,12 +576,12 @@ def detect_language_advanced(
         return None
 
     full_list = []
-    for profile in known_profiles:
-        if not check_profile(profile):
+    for element in known_profiles:
+        if not check_profile(element):
             return None
 
-        compared_by_mse = compare_profiles_by_mse(unknown_profile, profile)
-        compared_by_top_n = compare_profiles_by_top_n(unknown_profile, profile, top_n)
+        compared_by_mse = compare_profiles_by_mse(unknown_profile, element)
+        compared_by_top_n = compare_profiles_by_top_n(unknown_profile, element, top_n)
         if not (isinstance(compared_by_top_n, float)
                 and isinstance(compared_by_mse, float)):
             return None
@@ -571,7 +590,7 @@ def detect_language_advanced(
             "MSE": compared_by_mse,
             "Top-N": compared_by_top_n
             }
-        prof = (profile[0], dicts)
+        prof = (element[0], dicts)
         full_list.append(prof)
 
     sorted_list = sorted(full_list, key=lambda x:
@@ -600,7 +619,7 @@ def print_report(
               isinstance(top_n, int)]):
         return None
 
-    if not top_n > 0:
+    if not top_n>0:
         return None
 
     for item in metrics_stats:
