@@ -507,8 +507,9 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         if load_profile(path) is not None
     ]
 
-    if not all(isinstance(i, tuple) for i in list_of_profs):
-        return None
+    for element in list_of_profs:
+        if not isinstance(element, tuple):
+            return None
 
     for item in list_of_profs:
         if not check_profile(item):
