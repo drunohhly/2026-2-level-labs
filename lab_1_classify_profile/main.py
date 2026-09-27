@@ -507,8 +507,8 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
         if load_profile(path) is not None
     ]
 
-    for element in list_of_profs:
-        if not isinstance(element, tuple):
+    for item in list_of_profs:
+        if item is None:
             return None
 
     for item in list_of_profs:
@@ -516,7 +516,6 @@ def collect_profiles(paths_to_profiles: Sequence[str]) -> Sequence[ProfileType] 
             return None
 
     return list_of_profs
-
 
 
 def detect_language_advanced(
