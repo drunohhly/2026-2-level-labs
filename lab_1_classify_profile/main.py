@@ -74,8 +74,7 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
         dict[str, float] | None: Dictionary with frequencies.
         Returns None in case of incorrect input types.
     """
-    if not any([isinstance(tokens, list),
-                isinstance(tokens, tuple)]):
+    if not isinstance(tokens, (list, tuple)):
         return None
 
     for element in tokens:
@@ -85,9 +84,7 @@ def calculate_frequencies(tokens: Sequence[str]) -> dict[str, float] | None:
     frequency = {}
     overall_words = len(tokens)
     for element in tokens:
-        if element not in frequency:
-            frequency[element] = 0.0
-        frequency[element] += 1 / overall_words
+        frequency[element] = frequency.get(element, 0.0) + 1.0 / overall_words
 
     return frequency
 
