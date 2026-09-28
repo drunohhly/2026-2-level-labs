@@ -576,10 +576,8 @@ def print_report(
     """
     if not all([check_profile(unknown_profile),
               isinstance(metrics_stats, (list, tuple)),
-              isinstance(top_n, int)]):
-        return None
-
-    if not top_n > 0:
+              isinstance(top_n, int),
+              top_n > 0]):
         return None
 
     for item in metrics_stats:
