@@ -140,8 +140,7 @@ def create_language_profile(
     """
     if not all([isinstance(language, str),
                 isinstance(text, str),
-                any([isinstance(stop_words, list),
-                    isinstance(stop_words, tuple)])]):
+                isinstance(stop_words, (list, tuple))]):
         return None
 
     tokenized_text = tokenize(text)
@@ -162,7 +161,7 @@ def create_language_profile(
         return None
 
     for el in freq_dict:
-        freq_dict[el] = freq_dict[el] * len(tokenized_text_without_stopwords)
+        freq_dict[el] = freq_dict[el] / len(tokenized_text_without_stopwords)
     n_words = len(freq_dict)
 
     return language, freq_dict, n_words
@@ -619,6 +618,9 @@ def print_report(
     print("Language scores")
     print("---------------")
     for ele in metrics_stats:
-        print(f"{ele[0]}: MSE {ele[1]["MSE"]:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
+        if ele[1]['MSE'] % 1 < 0.0001:
+            print(f"{ele[0]}: MSE {ele[1]['MSE']:g}  Top-N Score {ele[1]["Top-N"]:g}")
+        else:
+            print(f"{ele[0]}: MSE {ele[1]['MSE']:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
 
     return None
