@@ -577,7 +577,10 @@ def print_report(
     if not all([check_profile(unknown_profile),
               isinstance(metrics_stats, (list, tuple)),
               isinstance(top_n, int),
-              top_n > 0]):
+              ]):
+        return None
+
+    if not top_n > 0:
         return None
 
     for item in metrics_stats:
@@ -616,9 +619,6 @@ def print_report(
     print("Language scores")
     print("---------------")
     for ele in metrics_stats:
-        if ele[1]['MSE'] % 1 < 0.0001:
-            print(f"{ele[0]}: MSE {ele[1]['MSE']:g}  Top-N Score {ele[1]["Top-N"]:g}")
-        else:
-            print(f"{ele[0]}: MSE {ele[1]['MSE']:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
+        print(f"{ele[0]}: MSE {ele[1]["MSE"]:.5f}  Top-N Score {ele[1]["Top-N"]:.5f}")
 
     return None
