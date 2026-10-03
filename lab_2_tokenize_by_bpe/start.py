@@ -3,7 +3,7 @@ BPE Tokenizer starter
 """
 
 # pylint:disable=too-many-locals, unused-variable
-from lab_2_tokenize_by_bpe.main import (
+from main import (
     collect_frequencies,
 )
 
@@ -21,6 +21,7 @@ def main() -> None:
     result = None
 
     collect_frequencies(text, None, "</s>")
+
     assert result, "Translation not working"
 
 

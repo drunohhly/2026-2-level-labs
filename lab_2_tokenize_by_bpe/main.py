@@ -107,6 +107,7 @@ def collect_frequencies(
     return dict_of_frequencies
 
 
+
 def count_tokens_pairs(
     word_frequencies: dict[tuple[str, ...], int],
 ) -> dict[tuple[str, str], int] | None:
@@ -125,16 +126,40 @@ def count_tokens_pairs(
     """
     if not isinstance(word_frequencies, dict):
         return None
-    list_of_tokens = []
+
+    unpacked_dict = []
     for key in word_frequencies:
-        for letter in key:
-            if key.index(letter) > 0:
-                list_of_tokens.append((key[(key.index(letter) - 1)], key))
-                if len(key)-1 >= key.index(letter) + 1:
-                    list_of_tokens.append((key, key[(key.index(letter) + 1)]))
+        counter = word_frequencies[key]
+        while counter != 0:
+            unpacked_dict.append(key)
+            counter -= 1
+
+    list_of_tokens = []
+    for key in unpacked_dict:
+        for index in range(len(key)):
+            if index > 0:
+                list_of_tokens.append((key[(index - 1)], key[index]))
     #сделала список с повторяющимися парами, сделать чистый без повторений для записи в словрь
     #через каунт посчитаьь частотность, потом тоже почистить список и зипнуть
     #я помню про то что нельзя оставлять комментарии на русском я удалю попозже когда докумекаю до функции
+    list_of_original_tokens = []
+    for i in list_of_tokens:
+        if i not in list_of_original_tokens:
+            list_of_original_tokens.append(i)
+
+    list_of_frequencies = []
+    for pair in list_of_original_tokens:
+        frequency = list_of_tokens.count(pair)
+        list_of_frequencies.append(frequency)
+
+    dict_of_pair_frequency = dict(zip(list_of_original_tokens, list_of_frequencies))
+
+    return dict_of_pair_frequency
+
+text = 'Вез корабль карамель, наскочил корабль на мель, матросы две недели карамель на мели ели.'
+a = (collect_frequencies(text, None, '</s>'))
+print(a)
+print(count_tokens_pairs(a))
 
 
 def merge_tokens(
@@ -154,6 +179,48 @@ def merge_tokens(
 
     In case of corrupt input arguments, None is returned
     """
+    if not all([
+        isinstance(word_frequencies, dict),
+        isinstance(pair, tuple)
+    ]):
+        return None
+
+    if not all([len(pair) == 2,
+                all(isinstance(element, str) for element in pair)
+    ]):
+        return None
+
+    for keys, values in word_frequencies.items():
+        if not all([
+            isinstance(keys, tuple),
+            isinstance(values, int),
+            all(isinstance(item, str) for item in keys)
+        ]):
+            return None
+
+    list_of_keys = list(word_frequencies.keys())
+
+    keys_as_lists = [
+        list(element) for element
+        in list_of_keys]
+
+    for element in keys_as_lists:
+        for index in range(len(element) - 1):
+            if (element[index] == pair[0]
+                and element[index + 1] == pair[1]):
+                element.pop(index + 1)
+                element[index] = (f'{pair[0]}{pair[1]}')
+
+    keys_as_tuples = [
+        tuple(element) for element
+        in keys_as_lists
+    ]
+
+    list_of_frequencies = list(word_frequencies.values())
+
+    new_dict = dict(zip(keys_as_tuples, list_of_frequencies))
+
+    return new_dict
 
 
 def train(
@@ -174,6 +241,54 @@ def train(
     In case of corrupt input arguments or functions used return None,
     None is returned
     """
+    if not all([
+        isinstance(word_frequencies, dict),
+        isinstance(num_merges, int)
+    ]):
+        return None
+
+    for key, values in word_frequencies.items():
+        if not all([
+            isinstance(key, tuple),
+            isinstance(values, int),
+            all(isinstance(letter, str) for letter in key)
+        ]):
+            return None
+
+    if num_merges < 0:
+        return None
+
+    while num_merges != 0:
+
+        num_merges -= 1
+
+        pair_frequency = count_tokens_pairs(word_frequencies)
+        if not isinstance(pair_frequency, dict):
+            return None
+
+        unpacked_pair_frequency = list(
+            pair_frequency.items()
+        )
+
+        sorted_list_of_frequencies = sorted(
+            unpacked_pair_frequency, key = lambda x: (
+                -x[1],
+                -(len(f"{x[0][0]}{x[0][1]}")),
+                f"{x[0][0]}{x[0][1]}"
+            )
+        )
+
+        word_frequencies = merge_tokens(word_frequencies,
+                                    sorted_list_of_frequencies[0][0])
+
+        sorted_list_of_frequencies.pop(0)
+
+        if len(sorted_list_of_frequencies) == 0:
+            break
+
+    return word_frequencies
+
+print(train(a, 30))
 
 
 def get_vocabulary(
