@@ -201,11 +201,14 @@ def merge_tokens(
     for element in keys_as_lists:
         indexes = list(range(len(element) - 1))
         for index in indexes:
-            if (element[index] == pair[0]
-                and element[index + 1] == pair[1]):
+            if (
+                element[index] == pair[0]
+                and element[index + 1] == pair[1]
+                ):
                 element.pop(index + 1)
                 indexes.pop(len(element) - 1)
                 element[index] = (f'{pair[0]}{pair[1]}')
+
 
     keys_as_tuples = [
         tuple(element) for element
@@ -254,13 +257,11 @@ def train(
     if num_merges < 0:
         return None
 
-    while num_merges != 0:
-
-        num_merges -= 1
+    for _ in range(num_merges):
 
         pair_frequency = count_tokens_pairs(word_frequencies)
-        if not isinstance(pair_frequency, dict):
-            return None
+        if not pair_frequency:
+            break
 
         unpacked_pair_frequency = list(
             pair_frequency.items()
@@ -269,18 +270,21 @@ def train(
         sorted_list_of_frequencies = sorted(
             unpacked_pair_frequency, key = lambda x: (
                 -x[1],
-                -(len(f"{x[0][0]}{x[0][1]}")),
-                f"{x[0][0]}{x[0][1]}"
+                -(len(x[0][0] + x[0][1])),
+                x[0][0] + x[0][1]
             )
         )
 
-        word_frequencies = merge_tokens(word_frequencies,
+        tokenised_text = merge_tokens(word_frequencies,
                                     sorted_list_of_frequencies[0][0])
 
-        sorted_list_of_frequencies.pop(0)
+        if not tokenised_text:
+            return None
 
-        if len(sorted_list_of_frequencies) == 0:
+        if tokenised_text == word_frequencies:
             break
+
+        word_frequencies = tokenised_text
 
     return word_frequencies
 
@@ -327,10 +331,6 @@ def get_vocabulary(
             for letter in tokens:
 
                 list_of_words.append(letter)
-
-        word = ''.join(list_of_letters)
-        list_of_words.append(word)
-        list_of_letters = []
 
     list_of_words.append(unknown_token)
 

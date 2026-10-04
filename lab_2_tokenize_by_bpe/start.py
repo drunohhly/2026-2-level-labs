@@ -1,7 +1,7 @@
 """
 BPE Tokenizer starter
 """
-
+import json
 # pylint:disable=too-many-locals, unused-variable
 from main import (
     collect_frequencies,
@@ -21,11 +21,11 @@ def main() -> None:
         text_reference_translation = text_file.read()
     with open("lab_2_tokenize_by_bpe/assets/en_encoded.txt", "r", encoding="utf-8") as text_file:
         translation_encoded_raw = text_file.read()
-    with open("lab_2_tokenize_by_bpe/assets/secrets/secret_5.txt", "r", encoding="utf-8") as file:
-        secret_5 = file.read()
+    with open("lab_2_tokenize_by_bpe/assets/secrets/secret_2.txt", "r", encoding="utf-8") as file:
+        secret_2 = file.read()
 
     list_of_nums = [
-        int(i) for i in secret_5.split()
+        int(i) for i in secret_2.split()
     ]
 
     result = None
