@@ -1,7 +1,7 @@
 """
 BPE Tokenizer starter
 """
-import json
+
 # pylint:disable=too-many-locals, unused-variable
 from main import (
     collect_frequencies,
