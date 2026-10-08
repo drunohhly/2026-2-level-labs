@@ -6,6 +6,7 @@ BPE and machine translation evaluation
 
 # pylint:disable=unused-argument
 from typing import Sequence
+import json
 
 
 def prepare_word(
@@ -24,32 +25,36 @@ def prepare_word(
 
     In case of corrupt input arguments, None is returned
     """
-    if not all(
+    if not all (
         [
-            isinstance(raw_word, str),
+            isinstance(raw_word,
+                            str),
             any([
-                isinstance(start_of_word, str),
+                isinstance(start_of_word,
+                                    str),
                 not start_of_word
                 ]),
             any([
-                isinstance(end_of_word, str),
+                isinstance(end_of_word,
+                                    str),
                 not end_of_word
                 ])
         ]
     ):
         return None
 
-    if any(
-        [isinstance(end_of_word, (tuple,
-                                  list,
-                                  dict)),
-          start_of_word == 0,
+    if any (
+        [
+            isinstance(end_of_word, (tuple,
+                                    list,
+                                    dict)),
+            start_of_word == 0,
 
-          isinstance(start_of_word, (tuple,
-                                     list,
-                                     dict)),
-          end_of_word == 0
-          ]
+            isinstance(start_of_word, (tuple,
+                                        list,
+                                        dict)),
+        end_of_word == 0
+        ]
     ):
         return None
 
@@ -86,16 +91,16 @@ def collect_frequencies(
     None is returned
     """
     if not all(
-                [
-            isinstance(text,
-                        str),
-            any([
-                isinstance(start_of_word,
-                                    str),
-                not start_of_word
-                ]),
-            isinstance(end_of_word,
-                                 str)
+            [
+                isinstance(text,
+                            str),
+                any ([
+                    isinstance(start_of_word,
+                                        str),
+                    not start_of_word
+                    ]),
+                isinstance(end_of_word,
+                                    str)
             ]
     ):
         return None
@@ -136,7 +141,8 @@ def count_tokens_pairs(
 
     In case of corrupt input arguments, None is returned
     """
-    if not isinstance(word_frequencies, dict):
+    if not isinstance(word_frequencies,
+                                    dict):
         return None
 
     unpacked_dict = []
@@ -179,37 +185,49 @@ def merge_tokens(
 
     In case of corrupt input arguments, None is returned
     """
-    if not all([
-        isinstance(word_frequencies,
-                                dict),
-        isinstance(pair,
-                   tuple)
-    ]):
+    if not all(
+        [
+            isinstance(word_frequencies,
+                                    dict),
+            isinstance(pair,
+                        tuple)
+        ]
+    ):
         return None
 
-    if not all([len(pair) == 2,
-                all(isinstance(element,
+    if not all(
+        [
+                len(pair) == 2,
+                all (
+                    isinstance(element,
                                     str)
-                        for element in pair)
-    ]):
+                    for element in pair
+                    )
+        ]
+    ):
         return None
 
     for keys, values in word_frequencies.items():
-        if not all([
-            isinstance(keys,
-                       tuple),
-            isinstance(values,
-                       int),
-            all(isinstance(item,
-                            str)
-                    for item in keys)
-        ]):
+        if not all(
+            [
+                isinstance(keys,
+                            tuple),
+                isinstance(values,
+                                int),
+                all (
+                    isinstance(item,
+                                str)
+                    for item in keys
+                    )
+            ]
+        ):
             return None
 
     list_of_keys = list(word_frequencies.keys())
 
     keys_as_lists = [
-                list(element) for element
+                list(element)
+                for element
                 in list_of_keys]
 
     for element in keys_as_lists:
@@ -268,9 +286,11 @@ def train(
                        tuple),
             isinstance(values,
                        int),
-            all(isinstance(letter,
-                           str)
-                for letter in key)
+            all (
+                isinstance(letter,
+                                str)
+                for letter in key
+                )
         ]):
             return None
 
@@ -334,16 +354,20 @@ def get_vocabulary(
         return None
 
     for keys, value in word_frequencies.items():
-        if not all([
+        if not all(
+            [
             isinstance(keys,
                         tuple),
             isinstance(value,
                             int),
-            all(isinstance(token,
+            all(
+                isinstance(token,
                                 str)
                 for token
-                in keys)
-        ]):
+                in keys
+                )
+            ]
+        ):
             return None
 
     list_of_words = []
@@ -459,6 +483,73 @@ def tokenize_word(
 
     In case of corrupt input arguments, None is returned
     """
+    if not all(
+        [
+            all(
+                [
+                    isinstance(word,
+                                tuple),
+                    word
+                ]
+            ),
+            isinstance(vocabulary,
+                                dict),
+            isinstance(end_of_word,
+                                str),
+            isinstance(unknown_token,
+                                    str)
+        ]
+    ):
+        return None
+
+    for keys, values in vocabulary.items():
+        if not all(
+            [
+                isinstance(keys,
+                                str),
+                isinstance(values,
+                                int),
+                all(
+                    isinstance(letter,
+                                    str)
+                        for letter in word
+                    )
+            ]
+        ):
+            return None
+
+    full_word = "".join(word)
+    word_tokenised = [i for i in full_word]
+    result = []
+
+    vocabulary_sorted = sorted(vocabulary.keys(), key = lambda x: (-len(x), x))
+
+    for token in vocabulary_sorted:
+        if token in full_word:
+            start_find = 0
+            first_index_word = full_word.index(token[0], start_find)
+            last_index_word = full_word.index(token[(len(token)) - 1], start_find)
+            while full_word[first_index_word:last_index_word + 1] != token[0:(len(token))]:
+                first_index_word = full_word.index(token[0], start_find)
+                last_index_word = full_word.index(token[(len(token)) - 1], start_find)
+                start_find += 1
+#обработать токен если он встречается в слове несколько раз
+#потом удалю комментарий
+            for i in range(word_tokenised.index(token[0], start_find) + 1, word_tokenised.index(token[(len(token)) - 1], start_find) + 1):
+                word_tokenised[i] = None
+            word_tokenised[word_tokenised.index(token[0], start_find)] = vocabulary[token]
+
+            full_word = "".join(element for element in word_tokenised if isinstance(element, str))
+
+    for i in range(len(word_tokenised)):
+        if word_tokenised[i] and not isinstance(word_tokenised[i], int):
+            word_tokenised[i] = vocabulary[unknown_token]
+
+    for element in word_tokenised:
+        if isinstance(element, int):
+            result.append(element)
+
+    return result
 
 
 def load_vocabulary(vocab_path: str) -> dict[str, int] | None:
@@ -473,6 +564,29 @@ def load_vocabulary(vocab_path: str) -> dict[str, int] | None:
 
     In case of corrupt input arguments, None is returned
     """
+    if not isinstance (vocab_path,
+                                str):
+        return None
+
+    with open (f"{vocab_path}", "r", encoding="utf-8") as file:
+        vocab = json.load(file)
+
+    if not isinstance(vocab,
+                        dict):
+        return None
+
+    for key, value in vocab.items():
+        if not all(
+            [
+            isinstance(key,
+                        str),
+            isinstance(value,
+                            int)
+            ]
+        ):
+            return None
+
+    return vocab
 
 
 def encode(
