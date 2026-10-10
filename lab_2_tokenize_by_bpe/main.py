@@ -526,7 +526,7 @@ def tokenize_word(
     vocabulary_sorted = sorted(vocabulary.keys(), key = lambda x: (-len(x), x))
 
     for token in vocabulary_sorted:
-        if token in full_word:
+        while token in full_word:
             start_find = 0
             first_index_word = full_word.index(token[0], start_find)
             last_index_word = full_word.index(token[(len(token)) - 1], start_find)
@@ -534,8 +534,6 @@ def tokenize_word(
                 first_index_word = full_word.index(token[0], start_find)
                 last_index_word = full_word.index(token[(len(token)) - 1], start_find)
                 start_find += 1
-#обработать токен если он встречается в слове несколько раз
-#потом удалю комментарий
             for i in range(word_tokenised.index(token[0], start_find) + 1, word_tokenised.index(token[(len(token)) - 1], start_find) + 1):
                 word_tokenised[i] = None
             word_tokenised[word_tokenised.index(token[0], start_find)] = vocabulary[token]
