@@ -7,7 +7,6 @@ BPE and machine translation evaluation
 import json
 import math
 
-
 # pylint:disable=unused-argument
 from typing import Sequence
 

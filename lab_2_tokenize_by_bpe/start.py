@@ -3,12 +3,7 @@ BPE Tokenizer starter
 """
 
 # pylint:disable=too-many-locals, unused-variable
-from main import (
-    collect_frequencies,
-    decode,
-    get_vocabulary,
-    train,
-)
+from main import collect_frequencies, decode, get_vocabulary, tokenize_word, train
 
 
 def main() -> None:
@@ -25,8 +20,7 @@ def main() -> None:
         secret_2 = file.read()
 
     list_of_nums = [
-        int(i) for i in secret_2.split()
-    ]
+        int(i) for i in secret_2.split()]
 
     result = None
 
@@ -37,7 +31,6 @@ def main() -> None:
     dict_of_ident = get_vocabulary(merging_tokens, '<unk>')
 
     decoded_text = decode(list_of_nums, dict_of_ident, "</s>")
-
     print(decoded_text)
 
     assert result, "Translation not working"
