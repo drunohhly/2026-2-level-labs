@@ -3,7 +3,15 @@ BPE Tokenizer starter
 """
 
 # pylint:disable=too-many-locals, unused-variable
-from main import calculate_bleu, collect_frequencies, decode, encode, get_vocabulary, load_vocabulary, train
+from lab_2_tokenize_by_bpe.main import (
+    calculate_bleu,
+    collect_frequencies,
+    decode,
+    encode,
+    get_vocabulary,
+    load_vocabulary,
+    train,
+)
 
 
 def main() -> None:
@@ -43,7 +51,7 @@ def main() -> None:
 
     encoded_text = encode(ru_raw, vocab, "\u2581", None, "<unk>")
 
-    if encoded_text[:21] == ru_encoded[:21]:
+    if encoded_text[:20] == ru_encoded[:20]:
         print(encoded_text)
 
     translation_encoded_raw = [int(i) for i in translation_encoded_raw.split()]

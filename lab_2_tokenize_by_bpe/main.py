@@ -196,7 +196,7 @@ def merge_tokens(
                 ):
                 element.pop(index + 1)
                 indexes.pop(len(element) - 1)
-                element[index] = (f'{pair[0]}{pair[1]}')
+                element[index] = f'{pair[0]}{pair[1]}'
 
     keys_as_tuples = [
             tuple(element)
@@ -370,10 +370,12 @@ def decode(
         or not vocabulary
         or (end_of_word_token is not None
             and not isinstance(end_of_word_token, str))
-        or not all(isinstance(i, int)
-                   for i
-                   in encoded_text)
     ):
+        return None
+
+    if not all(isinstance(i, int)
+                for i
+                in encoded_text):
         return None
 
     for key, value in vocabulary.items():
@@ -437,63 +439,26 @@ def tokenize_word(
         ):
             return None
 
-    full_word = "".join(word)
-    word_tokenised = [i for i in full_word]
-    result = []
-
+    list_of_letters = list(word)
     vocabulary_sorted = sorted(vocabulary.keys(), key = lambda x: (-len(x), x))
 
+    if end_of_word is not None:
+        list_of_letters.pop(-1)
+        list_of_letters.extend(list(end_of_word))
+
     for token in vocabulary_sorted:
-        while token in full_word:
-            start_find = 0
 
-            first_index_word = full_word.find(token, start_find)
-            if first_index_word == -1:
-                break
+        index = 0
 
-            last_index_word = first_index_word + len(token)
+        while index <= len(list_of_letters):
+            if "".join(list_of_letters[index:index + len(token)]) == token:
+                list_of_letters[index] = token
+                del list_of_letters[index + 1:index + len(token)]
+                index += 1
+            else:
+                index += 1
 
-            number_of_unmerged_letters = 0
-            first_index_in_list = -1
-            last_index_in_list = -1
-
-            for i in range(len(word_tokenised)):
-                item = word_tokenised[i]
-
-                if item is None or isinstance(item, int):
-                    continue
-
-                if number_of_unmerged_letters == first_index_word:
-                    first_index_in_list = i
-
-                if number_of_unmerged_letters == last_index_word - 1:
-                    last_index_in_list = i
-                    break
-                number_of_unmerged_letters += 1
-
-            occupied = 0
-            for k in range(first_index_in_list, last_index_in_list + 1):
-                if word_tokenised[k] is None or isinstance(word_tokenised[k], int):
-                    occupied += 1
-
-            if occupied > 0:
-                break
-            for i in range(first_index_in_list + 1, last_index_in_list + 1):
-                word_tokenised[i] = None
-            word_tokenised[first_index_in_list] = vocabulary[token]
-
-            full_word = "".join(element for element in word_tokenised if isinstance(element, str))
-
-    for i in range(len(word_tokenised)):
-        if word_tokenised[i] and not isinstance(word_tokenised[i], int):
-            word_tokenised[i] = vocabulary[unknown_token]
-
-    for element in word_tokenised:
-        if isinstance(element, int):
-            result.append(element)
-
-    return result
-
+    return [vocabulary.get(token, vocabulary.get(unknown_token)) for token in list_of_letters]
 
 def load_vocabulary(vocab_path: str) -> dict[str, int] | None:
     """
@@ -624,9 +589,12 @@ def calculate_precision(
 
     In case of corrupt input arguments, None is returned.
     """
-    if not (isinstance(actual, list)
-        and isinstance(reference, list)):
+    if not (isinstance(actual, Sequence)
+        and isinstance(reference, Sequence)):
         return None
+
+    if not actual or not reference:
+        return 0.0
 
     for element in actual:
         if not isinstance(element, tuple):
@@ -719,8 +687,8 @@ def calculate_bleu(actual: str | None, reference: str, max_order: int = 3) -> fl
         list_of_precisions.append(precision)
 
     result = calculate_geo_mean(list_of_precisions, max_order)
+
     if not result:
         return None
 
     return result * 100
-
