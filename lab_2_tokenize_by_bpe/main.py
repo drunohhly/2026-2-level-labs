@@ -605,7 +605,7 @@ def calculate_precision(
             return None
 
     common_ngrams = [word for word in set(reference) if word in set(actual)]
-    result = len(common_ngrams) / len(set(reference))
+    result = len(common_ngrams) / len(set(actual))
     return result
 
 
