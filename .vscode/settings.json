@@ -5,12 +5,5 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "files.autoSave": "onFocusChange",
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./admin_utils",
-        "-p",
-        "*test.py"
-    ]
+    "files.autoSave": "onFocusChange"
 }
