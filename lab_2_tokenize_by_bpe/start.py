@@ -33,8 +33,7 @@ def main() -> None:
 
     ru_encoded_int = [int(i) for i in ru_encoded]
 
-    list_of_nums = [
-        int(i) for i in secret_2.split()]
+    list_of_nums = [int(i) for i in secret_2.split()]
 
     result = None
 
@@ -51,6 +50,7 @@ def main() -> None:
     decoded_text = decode(list_of_nums, dict_of_ident, "</s>")
     if decoded_text is None:
         return None
+
     print(decoded_text)
 
     vocab = load_vocabulary("lab_2_tokenize_by_bpe/assets/vocab.json")
@@ -65,6 +65,7 @@ def main() -> None:
         print(encoded_text)
 
     translation_encoded_raw_int = [int(i) for i in translation_encoded_raw]
+
     decoded_text = decode(translation_encoded_raw_int, vocab, None)
     if decoded_text is None:
         return None
@@ -73,7 +74,9 @@ def main() -> None:
 
     bleu = calculate_bleu(decoded_text, text_reference_translation)
     print(bleu)
+
     assert result, "Translation not working"
+    return None
 
 
 if __name__ == "__main__":
