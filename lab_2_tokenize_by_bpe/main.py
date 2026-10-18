@@ -423,7 +423,7 @@ def tokenize_word(
     if not all(
         [all([isinstance(word,tuple), word]),
             isinstance(vocabulary, dict),
-            isinstance(end_of_word, str),
+            (isinstance(end_of_word, str) or end_of_word is None),
             isinstance(unknown_token, str)]
     ):
         return None
@@ -549,22 +549,19 @@ def encode(
     In case of corrupt input arguments or functions used return None,
     None is returned
     """
-    if not all (
-        [isinstance(original_text, str),
-            isinstance(vocabulary, dict),
-            any([isinstance(start_of_word_token, str),
-                not start_of_word_token]),
-            any([isinstance(end_of_word_token, str),
-                not start_of_word_token]),
-            isinstance(unknown_token, str)]
+    if (
+        not isinstance(original_text, str)
+        or not isinstance(vocabulary, dict)
+        or not (isinstance(start_of_word_token, str) or start_of_word_token is None)
+        or not (isinstance(end_of_word_token, str) or end_of_word_token is None)
+        or not isinstance(unknown_token, str)
     ):
         return None
 
-    for keys, values in vocabulary.items():
-        if not all(
-            [isinstance(keys, str),
-            isinstance(values, int)]
-        ):
+    for key, value in vocabulary.items():
+        if not isinstance(key, str):
+            return None
+        if not isinstance(value, int):
             return None
 
     list_of_preprocessed_words = []
@@ -582,6 +579,7 @@ def encode(
         encoded_text.extend(encoded_word)
 
     return encoded_text
+
 
 def collect_ngrams(text: str, order: int) -> list[tuple[str, ...]] | None:
     """
