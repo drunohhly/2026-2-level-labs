@@ -229,10 +229,8 @@ def train(
     In case of corrupt input arguments or functions used return None,
     None is returned
     """
-    if not all([
-        isinstance(word_frequencies, dict),
-        isinstance(num_merges, int)
-    ]):
+    if not (isinstance(word_frequencies, dict)
+        and isinstance(num_merges, int)):
         return None
 
     for key, values in word_frequencies.items():
@@ -368,9 +366,11 @@ def decode(
         or not encoded_text
         or not isinstance(vocabulary, dict)
         or not vocabulary
-        or (end_of_word_token is not None
-            and not isinstance(end_of_word_token, str))
     ):
+        return None
+
+    if (end_of_word_token is not None
+        and not isinstance(end_of_word_token, str)):
         return None
 
     if not all(isinstance(i, int)
@@ -384,15 +384,13 @@ def decode(
         if not isinstance(key,  str):
             return None
 
-    keys = list(vocabulary.keys())
-    values = list(vocabulary.values())
-    vocabulary = dict(zip(values, keys))
+    vocabulary_reversed = dict(zip(vocabulary.values(), vocabulary.keys()))
 
     if isinstance(encoded_text, str):
         encoded_text.split(" ")
 
     list_of_encoded_tokens = [
-        vocabulary[token]
+        vocabulary_reversed[token]
         for token
         in encoded_text
     ]
@@ -458,7 +456,7 @@ def tokenize_word(
             else:
                 index += 1
 
-    return [vocabulary.get(token, vocabulary.get(unknown_token)) for token in list_of_letters]
+    return [vocabulary.get(token, vocabulary[unknown_token]) for token in list_of_letters]
 
 def load_vocabulary(vocab_path: str) -> dict[str, int] | None:
     """
@@ -597,15 +595,13 @@ def calculate_precision(
         return 0.0
 
     for element in actual:
-        if not isinstance(element, tuple):
-            return None
-        if not all((isinstance(i, str)) for i in element):
+        if not (isinstance(element, tuple)
+            and all((isinstance(i, str)) for i in element)):
             return None
 
     for element in reference:
-        if not isinstance(element, tuple):
-            return None
-        if not all((isinstance(i, str)) for i in element):
+        if not (isinstance(element, tuple)
+            and all((isinstance(i, str)) for i in element)):
             return None
 
     common_ngrams = [word for word in set(reference) if word in set(actual)]
@@ -660,16 +656,16 @@ def calculate_bleu(actual: str | None, reference: str, max_order: int = 3) -> fl
     In case of corrupt input arguments or functions used return None,
     None is returned
     """
-    if not all([any([isinstance(actual, str),
-                actual is None]),
-                isinstance(reference, str),
-                isinstance(max_order, int)
-    ]):
+    if (not isinstance(actual, str)
+        or not isinstance(reference, str)
+        or not isinstance(max_order, int)
+    ):
         return None
 
     list_of_precisions = []
 
     for i in range(1, max_order + 1):
+
 
         actual_ngrams = collect_ngrams(actual, i)
         predicted_ngrams = collect_ngrams(reference, i)
