@@ -4,9 +4,6 @@ Lab 2.
 BPE and machine translation evaluation
 """
 
-import json
-import math
-
 # pylint:disable=unused-argument
 import json
 import math
@@ -389,35 +386,6 @@ def tokenize_word(
 
     return encoded_ids
 
-    for keys, values in vocabulary.items():
-        if not all(
-            [isinstance(keys, str),
-            isinstance(values, int),
-            all(isinstance(letter, str)
-                    for letter in word)]
-        ):
-            return None
-
-    list_of_letters = list(word)
-    vocabulary_sorted = sorted(vocabulary.keys(), key = lambda x: (-len(x), x))
-
-    if end_of_word is not None:
-        list_of_letters.pop(-1)
-        list_of_letters.extend(list(end_of_word))
-
-    for token in vocabulary_sorted:
-
-        index = 0
-
-        while index <= len(list_of_letters):
-            if "".join(list_of_letters[index:index + len(token)]) == token:
-                list_of_letters[index] = token
-                del list_of_letters[index + 1:index + len(token)]
-                index += 1
-            else:
-                index += 1
-
-    return [vocabulary.get(token, vocabulary[unknown_token]) for token in list_of_letters]
 
 def load_vocabulary(vocab_path: str) -> dict[str, int] | None:
     """
