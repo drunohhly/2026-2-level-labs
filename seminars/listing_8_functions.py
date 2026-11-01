@@ -126,7 +126,7 @@ def who_loves_whom(who: str, whom: str) -> None:
 
 
 # Task 1:
-def calculate_sum() -> int:
+def calculate_sum(a, b, c) -> int:
     """
     Return sum of received numbers.
 
@@ -139,15 +139,16 @@ def calculate_sum() -> int:
         int: sum of received numbers
     """
     # student implementation goes here
+    return a + b + c
 
-
+print(calculate_sum(1, -5, 0))
 # Function calls with expected result:
 # calculate_sum(1, 2, 3) -> 6
 # calculate_sum(1, -5, 0) -> 4
 
 
 # Task 2:
-def calculate_power() -> int:
+def calculate_power(a, b) -> int:
     """
     Raise the number to the required power.
 
@@ -159,7 +160,7 @@ def calculate_power() -> int:
         int: number in the required power
     """
     # student implementation goes here
-
+    return a**b
 
 # Function calls with expected result:
 # calculate_power(2, 3) -> 8
@@ -168,7 +169,7 @@ def calculate_power() -> int:
 
 
 # Task 3:
-def calculate_factorial() -> int:
+def calculate_factorial(a) -> int:
     """
     Calculate factorial of the received number.
 
@@ -179,6 +180,11 @@ def calculate_factorial() -> int:
         int: factorial of the received number
     """
     # student implementation goes here
+    listtt = []
+    list_2 = []
+    for i in range(1, a+1):
+        listtt.append(i)
+
 
 
 # Function calls with expected result:
@@ -188,7 +194,7 @@ def calculate_factorial() -> int:
 
 
 # Task 4:
-def encode_message() -> list:
+def encode_message(message, dict) -> list:
     """
     Encode the message.
 
@@ -200,7 +206,11 @@ def encode_message() -> list:
         list: list of digits as an encoded message
     """
     # student implementation goes here
-
+    result = ""
+    for element in message:
+        result.join(str(dict[element]))
+    return result
+print(encode_message("hello", {"h": 1, "e": 2, "l": 3, "o": 4}))
 
 # Function calls with expected result:
 # encode_message("hello", {"h": 1, "e": 2, "l": 3, "o": 4}) -> [1, 2, 3, 3, 4]

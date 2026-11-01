@@ -51,7 +51,7 @@ def main() -> None:
     if decoded_text is None:
         return None
 
-    print(decoded_text)
+    """print(decoded_text)"""
 
     vocab = load_vocabulary("lab_2_tokenize_by_bpe/assets/vocab.json")
     if vocab is None:
@@ -61,8 +61,8 @@ def main() -> None:
     if encoded_text is None:
         return None
 
-    if encoded_text[:20] == ru_encoded_int[:20]:
-        print(encoded_text)
+    """if encoded_text[:20] == ru_encoded_int[:20]:
+        print(encoded_text)"""
 
     translation_encoded_raw_int = [int(i) for i in translation_encoded_raw]
 
@@ -71,9 +71,13 @@ def main() -> None:
         return None
 
     decoded_text = decoded_text.replace("\u2581", " ")
+    print(decoded_text)
 
-    bleu = calculate_bleu(decoded_text, text_reference_translation)
-    print(bleu)
+
+    bleu_from_1_to_10 = []
+    for i in range(1, 11):
+        bleu_from_1_to_10.append(calculate_bleu(decoded_text, text_reference_translation, i))
+    print(bleu_from_1_to_10)
 
     assert result, "Translation not working"
     return None

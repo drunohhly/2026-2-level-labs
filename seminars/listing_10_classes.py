@@ -183,39 +183,45 @@ print("*" * 15 + " TASKS " + "*" * 15)
 
 # Task 1
 # easy level
-# class ...:
-#
-#     def __init__(...):
-#         ...
+class Deadline:
+
+    def __init__(self):
+        self.message = "Oh, no! It is another deadline!"
+        print(self.message)
 
 # fill the gaps so that the next line prints: "Oh, no! It is another deadline!"
-# deadline = Deadline()
+deadline = Deadline()
 
 
 #  Task 2
 # easy level
-# class ...:
-#
-#     def ...:
-#         ...
+class Student:
+
+    def __init__(self, name, year):
+        self.name = name
+        self.year = year
+        print(f"Hello! My name is {self.name}, I'm in year {self.year}")
+
+
 
 # fill the gaps so that the next lines print the corresponding messages
-# student1 = Student('Marina', 1)  # Hello! My name is Marina, I'm in year 1
+student1 = Student('Marina', 1)  # Hello! My name is Marina, I'm in year 1
 # student2 = Student('Nastya', 2)  # Hello! My name is Nastya, I'm in year 2
 
 
 # Task 3
 # easy level
-# class Insect:
+class Insect:
 #
-#     def __init__(...):
-#         ...
+    def __init__(self, name: str, legs: int):
+        self.name = name
+        self.legs = legs
 #
-#     def introduce(self):
-#         print(f'Hi! My name is {self.name} and I have {self.legs} legs')
+    def introduce(self):
+        print(f'Hi! My name is {self.name} and I have {self.legs} legs')
 
-# bee = Insect('Bee', 6)
-# bee.introduce()  # Hi! My name is Bee and I have 6 legs
+bee = Insect('Bee', 6)
+bee.introduce()  # Hi! My name is Bee and I have 6 legs
 #
 # spider = Insect('Spider', 8)
 # spider.introduce()  # Hi! My name is Spider and I have 8 legs
@@ -223,17 +229,25 @@ print("*" * 15 + " TASKS " + "*" * 15)
 
 # Task 4
 # medium level
-# class Student:
+class Student:
 #     """
 #     If I have less than three deadlines, my mood is Good!
 #     If I have from 3 to 5 deadlines, my mood is So-so...
 #     If I have more than 5 deadlines, my mood is Bad!!!
 #     """
-
+    def __init__ (self, deadlines: int):
+        self.deadlines = deadlines
+        if self.deadlines  < 3:
+            self.mood = "Good"
+        if 3 <= self.deadlines <= 5:
+            self.mood = "So-so..."
+        else:
+            self.mood = "Bad!!!"
+        print(self.mood)
 
 # implement a class so that the following code works
-# student = Student(2)
-# print(student.mood())  # Good
+student = Student(2)
+print(student.mood())  # Good
 # student.deadlines = 4
 # print(student.mood())  # So-so
 # student.deadlines = 1000
