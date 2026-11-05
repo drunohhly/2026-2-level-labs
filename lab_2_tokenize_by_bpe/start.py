@@ -49,16 +49,12 @@ def main() -> None:
     if vocabulary is None:
         return
 
-<<<<<<< HEAD
-    """print(decoded_text)"""
-=======
     # "secret"
     secret3 = [int(number) for number in secret3_raw.split()]
     secret = decode(secret3, vocabulary, '</s>')
     if secret is None:
         return
     print(secret)
->>>>>>> 1f5b3e7e3512534907990b6f74930a1143074539
 
     # "mark 8"
     with open("lab_2_tokenize_by_bpe/assets/ru_raw.txt", "r", encoding="utf-8") as text_file:
@@ -68,10 +64,6 @@ def main() -> None:
     if ru_vocabulary is None:
         return
 
-<<<<<<< HEAD
-    """if encoded_text[:20] == ru_encoded_int[:20]:
-        print(encoded_text)"""
-=======
     encoded_ru = encode(
         ru_text,
         ru_vocabulary,
@@ -84,7 +76,6 @@ def main() -> None:
     # "comparison"
     with open("lab_2_tokenize_by_bpe/assets/ru_encoded.txt", "r", encoding="utf-8") as encoded_file:
         ru_to_compare_raw = encoded_file.read()
->>>>>>> 1f5b3e7e3512534907990b6f74930a1143074539
 
     ru_to_compare = [int(number) for number in ru_to_compare_raw.split()]
 
@@ -92,23 +83,12 @@ def main() -> None:
     # print("Encoded: ", encoded_ru[:n])
     # print("To compare: ", ru_to_compare[:n])
 
-<<<<<<< HEAD
-    decoded_text = decoded_text.replace("\u2581", " ")
-    print(decoded_text)
-
-
-    bleu_from_1_to_10 = []
-    for i in range(1, 11):
-        bleu_from_1_to_10.append(calculate_bleu(decoded_text, text_reference_translation, i))
-    print(bleu_from_1_to_10)
-=======
     # "mark 10"
     translation_encoded = [int(number) for number in translation_encoded_raw.split()]
 
     en_vocabulary = load_vocabulary("lab_2_tokenize_by_bpe/assets/vocab.json")
     if en_vocabulary is None:
         return
->>>>>>> 1f5b3e7e3512534907990b6f74930a1143074539
 
     translation_decoded = decode(
         translation_encoded,
