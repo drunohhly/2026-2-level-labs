@@ -3,7 +3,7 @@ Generation by NGrams starter
 """
 
 # pylint:disable=too-many-locals, unused-import, unused-variable
-
+from main import TextProcessor
 
 def main() -> None:
     """
@@ -16,6 +16,13 @@ def main() -> None:
     ) as text_file:
         text = text_file.read()
     result = None
+
+    processor = TextProcessor("_")
+
+    encoded_text = processor.encode(text)
+
+    result = processor.decode(encoded_text)
+
     assert result
 
 
