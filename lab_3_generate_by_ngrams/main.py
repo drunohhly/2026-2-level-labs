@@ -276,7 +276,6 @@ class TextProcessor:
         return text
 
 
-
 class WordProcessor(TextProcessor):
     """
     Handle text tokenization, encoding and decoding on the level of words.
@@ -349,6 +348,9 @@ class NGramLanguageModel:
             encoded_corpus (tuple | None): Encoded text
             n_gram_size (int): A size of n-grams to use for language modelling
         """
+        self._encoded_corpus = encoded_corpus
+        self.__n_gram_size = n_gram_size
+        self._n_gram_frequencies = {}
 
     def get_n_gram_size(self) -> int:  # type: ignore[empty-body]
         """
@@ -357,6 +359,7 @@ class NGramLanguageModel:
         Returns:
             int: Size of stored n_grams
         """
+        return self.__n_gram_size
 
     def set_n_grams(self, frequencies: dict) -> None:
         """
@@ -378,6 +381,40 @@ class NGramLanguageModel:
         In case of corrupt input arguments or methods used return None,
         False is returned
         """
+        if not isinstance(self._encoded_corpus, tuple):
+            return False
+
+        if not self._encoded_corpus:
+            return False
+
+        corpus_of_n_gramms = self._extract_n_grams(self._encoded_corpus)
+        if not corpus_of_n_gramms:
+            return False
+
+        dict_of_frequency = {}
+        for n_gramm in set(corpus_of_n_gramms):
+            frequency = corpus_of_n_gramms.count(n_gramm)
+            dict_of_frequency[n_gramm] = frequency
+
+        corpus_of_starts = []
+        for n_gramm in corpus_of_n_gramms:
+            n_gramm = list(n_gramm)
+            n_gramm.pop(-1)
+            corpus_of_starts.append(tuple(n_gramm))
+
+        dict_of_freq_starts = {}
+        for item in set(corpus_of_starts):
+            freq = corpus_of_starts.count(item)
+            dict_of_freq_starts[item] = freq
+
+        for n_gramm in set(corpus_of_n_gramms):
+            for start in set(corpus_of_starts):
+                if n_gramm[:-1] == start:
+                    mle = dict_of_frequency.get(n_gramm) / dict_of_freq_starts.get(start)
+                    self._n_gram_frequencies[n_gramm] = mle
+
+        if self._n_gram_frequencies:
+            return True
 
     def generate_next_token(self, sequence: tuple[int, ...]) -> dict | None:
         """
@@ -391,6 +428,28 @@ class NGramLanguageModel:
 
         In case of corrupt input arguments, None is returned
         """
+        if not isinstance(sequence, tuple):
+            return None
+
+        if not sequence:
+            return None
+
+        if len(sequence) < self.__n_gram_size - 1:
+            return None
+
+        context = sequence[-self.__n_gram_size + 1:]
+        n_gramms = list(self._n_gram_frequencies.keys())
+
+        corpus_of_possible_token = []
+        for n_gramm in n_gramms:
+            if context == n_gramm[:self.__n_gram_size - 1]:
+                corpus_of_possible_token.append(n_gramm)
+
+        dict_of_predictions = {}
+        for item in corpus_of_possible_token:
+            dict_of_predictions[item[-1]] = self._n_gram_frequencies.get(item)
+
+        return dict_of_predictions
 
     def _extract_n_grams(
         self, encoded_corpus: tuple[int, ...]
@@ -406,7 +465,20 @@ class NGramLanguageModel:
 
         In case of corrupt input arguments, None is returned
         """
+        if not isinstance(encoded_corpus, tuple):
+            return None
 
+        if not encoded_corpus:
+            return None
+
+        corpus_of_ngrams = []
+        encoded_corpus = list(encoded_corpus)
+
+        while self.__n_gram_size <= len(encoded_corpus):
+            corpus_of_ngrams.append(tuple(encoded_corpus[:self.__n_gram_size]))
+            encoded_corpus.pop(0)
+
+        return tuple(corpus_of_ngrams)
 
 class GreedyTextGenerator:
     """
@@ -425,6 +497,9 @@ class GreedyTextGenerator:
             language_model (NGramLanguageModel): A language model to use for text generation
             text_processor (TextProcessor): A TextProcessor instance to handle text processing
         """
+        self._model =  language_model
+        self._text_processor = text_processor
+
 
     def run(self, prompt: str, seq_len: int) -> str | None:
         """
@@ -440,6 +515,34 @@ class GreedyTextGenerator:
         In case of corrupt input arguments or methods used return None,
         None is returned
         """
+        if not all([isinstance(prompt, str), isinstance(seq_len, int)]):
+            return None
+
+        if not all([prompt, seq_len]):
+            return None
+
+        if seq_len <= 0:
+            return None
+
+        encoded_text = self._text_processor.encode(prompt)
+        if not encoded_text:
+            return None
+
+        encoded_text = list(encoded_text)
+
+        for _ in range(seq_len + 1):
+            dict_of_predicted = self._model.generate_next_token(tuple(encoded_text))
+            if not dict_of_predicted:
+                break
+
+            dict_of_predicted = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]), reverse = True)
+            encoded_text.append(dict_of_predicted[0][0])
+
+        text = self._text_processor.decode(tuple(encoded_text))
+        if not text:
+            return None
+
+        return text
 
 
 class BeamSearcher:
