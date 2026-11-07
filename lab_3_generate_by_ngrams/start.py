@@ -30,7 +30,7 @@ def main() -> None:
     textgenerator = GreedyTextGenerator(n_gramm, processor)
     generated_text = textgenerator.run('Vernon', 51)
 
-    print(mle)
+    print(generated_text)
 
     assert result
 

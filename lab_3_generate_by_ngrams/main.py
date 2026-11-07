@@ -392,9 +392,8 @@ class NGramLanguageModel:
             return False
 
         dict_of_frequency = {}
-        for n_gramm in set(corpus_of_n_gramms):
-            frequency = corpus_of_n_gramms.count(n_gramm)
-            dict_of_frequency[n_gramm] = frequency
+        for n_gramm in corpus_of_n_gramms:
+            dict_of_frequency[n_gramm] = dict_of_frequency.get(n_gramm, 0) + 1
 
         corpus_of_starts = []
         for n_gramm in corpus_of_n_gramms:
@@ -403,9 +402,8 @@ class NGramLanguageModel:
             corpus_of_starts.append(tuple(n_gramm))
 
         dict_of_freq_starts = {}
-        for item in set(corpus_of_starts):
-            freq = corpus_of_starts.count(item)
-            dict_of_freq_starts[item] = freq
+        for item in corpus_of_starts:
+            dict_of_freq_starts[item] = dict_of_freq_starts.get(item, 0) + 1
 
         for n_gramm in set(corpus_of_n_gramms):
             for start in set(corpus_of_starts):
