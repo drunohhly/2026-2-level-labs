@@ -3,7 +3,7 @@ Generation by NGrams starter
 """
 
 # pylint:disable=too-many-locals, unused-import, unused-variable
-from main import GreedyTextGenerator, NGramLanguageModel, TextProcessor
+from main import BeamSearcher, GreedyTextGenerator, NGramLanguageModel, TextProcessor
 
 
 def main() -> None:
@@ -31,6 +31,8 @@ def main() -> None:
     generated_text = textgenerator.run('Vernon', 51)
 
     print(generated_text)
+
+    print(n_gramm.generate_next_token(encoded_text))
 
     assert result
 

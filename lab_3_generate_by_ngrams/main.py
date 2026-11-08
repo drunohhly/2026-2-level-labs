@@ -54,8 +54,8 @@ class TextProcessor:
             if not (element.isalpha() or element == " " or element == "\n"):
                 text = text.replace(element, "")
 
-            if not element.isalnum():
-                text = text.replace(element, self._end_of_word_token)
+        text = text.replace(" ", self._end_of_word_token)
+        text = text.replace("\n", self._end_of_word_token)
 
         while f"{self._end_of_word_token}{self._end_of_word_token}" in text:
             text = text.replace(f"{self._end_of_word_token}{self._end_of_word_token}", f"{self._end_of_word_token}")
@@ -64,6 +64,7 @@ class TextProcessor:
             text = text.replace(text[-1], self._end_of_word_token)
 
         result = [i for i in text]
+
         return tuple(result)
 
     def get_id(self, element: str) -> int | None:
@@ -92,7 +93,6 @@ class TextProcessor:
             str: EoW token
         """
         return self._end_of_word_token
-
 
     def get_token(self, element_id: int) -> str | None:
         """
@@ -198,7 +198,6 @@ class TextProcessor:
 
         return text
 
-
     def fill_from_ngrams(self, content: dict) -> None:
         """
         Fill internal storage with letters from external JSON.
@@ -206,6 +205,12 @@ class TextProcessor:
         Args:
             content (dict): ngrams from external JSON
         """
+        for n_gramm in content.keys():
+            for letter in set(n_gramm):
+                if letter.isalpha():
+                    if letter.lower() in self._storage:
+                        break
+                    self._put(letter.lower())
 
     def _decode(self, corpus: tuple[int, ...]) -> tuple[str, ...] | None:
         """
@@ -275,7 +280,6 @@ class TextProcessor:
 
         return text
 
-
 class WordProcessor(TextProcessor):
     """
     Handle text tokenization, encoding and decoding on the level of words.
@@ -328,7 +332,6 @@ class WordProcessor(TextProcessor):
         In case of corrupt input arguments, None is returned.
         In case decoded corpus does not contain any words, None is returned.
         """
-
 
 class NGramLanguageModel:
     """
@@ -469,14 +472,16 @@ class NGramLanguageModel:
         if not encoded_corpus:
             return None
 
-        corpus_of_ngrams = []
         encoded_corpus = list(encoded_corpus)
 
-        while self.__n_gram_size <= len(encoded_corpus):
+        """while self.__n_gram_size <= len(encoded_corpus):
             corpus_of_ngrams.append(tuple(encoded_corpus[:self.__n_gram_size]))
-            encoded_corpus.pop(0)
+            encoded_corpus.pop(0)"""
 
-        return tuple(corpus_of_ngrams)
+        res = tuple(tuple(encoded_corpus[i:i + self.__n_gram_size])
+                        for i in range(len(encoded_corpus) - self.__n_gram_size + 1))
+
+        return res
 
 class GreedyTextGenerator:
     """
@@ -560,6 +565,8 @@ class BeamSearcher:
             beam_width (int): Number of candidates to consider at each step
             language_model (NGramLanguageModel): A language model to use for next token prediction
         """
+        self._beam_width = beam_width
+        self._model = language_model
 
     def get_next_token(self, sequence: tuple[int, ...]) -> list[tuple[int, float]] | None:
         """
@@ -578,6 +585,20 @@ class BeamSearcher:
 
         In case of corrupt input arguments or methods used return None.
         """
+        if not isinstance(sequence, tuple):
+            return None
+
+        if not all([sequence, all(isinstance(i, int) for i in sequence)]):
+            return None
+
+        dict_of_predictions = self._model.generate_next_token(sequence)
+        if not dict_of_predictions:
+            return dict_of_predictions
+
+        sorted_dict = sorted(dict_of_predictions.items(), key = lambda x: (x[1], x[0]), reverse = True)
+
+        return sorted_dict[:self._beam_width]
+
 
     def continue_sequence(
         self,
