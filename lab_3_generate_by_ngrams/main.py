@@ -5,6 +5,7 @@ Beam-search and natural language generation evaluation
 """
 
 # pylint:disable=too-few-public-methods
+import math
 
 
 class TextProcessor:
@@ -547,7 +548,6 @@ class GreedyTextGenerator:
 
         return text
 
-
 class BeamSearcher:
     """
     Beam Search algorithm for diverse text generation.
@@ -622,6 +622,40 @@ class BeamSearcher:
 
         In case of corrupt input arguments or unexpected behaviour of methods used return None.
         """
+        if not all([isinstance(sequence, tuple),
+                    isinstance(next_tokens, list),
+                    isinstance(sequence_candidates, dict)]):
+            return None
+
+        if not all([sequence, next_tokens, sequence_candidates]):
+            return None
+
+        if not all([all(isinstance(i, tuple) for i in next_tokens),
+                    all(isinstance(k, tuple) for k in sequence_candidates.keys()),
+                    all(isinstance(v, float) for v in sequence_candidates.values())]):
+            return None
+
+        for tuples in next_tokens:
+            if not all([isinstance(tuples[0], int),
+                        isinstance(tuples[1], float)]):
+                return None
+
+        if not all(isinstance(i, int) for i in sequence_candidates.keys()):
+            return None
+
+        dict_of_fines = {}
+        for token in next_tokens:
+            fine = 0.0 - math.log(token[1])
+            dict_of_fines[token[0]] = fine
+
+        candidates_for_sequence = {}
+        for token in dict_of_fines.keys():
+            continued_sequence = list(sequence)
+            continued_sequence.append(token)
+            candidates_for_sequence[tuple(continued_sequence)] = dict_of_fines.get(token)
+
+        return candidates_for_sequence
+
 
     def prune_sequence_candidates(
         self, sequence_candidates: dict[tuple[int, ...], float]
@@ -637,6 +671,8 @@ class BeamSearcher:
 
         In case of corrupt input arguments return None.
         """
+
+
 
 
 class BeamSearchTextGenerator:
