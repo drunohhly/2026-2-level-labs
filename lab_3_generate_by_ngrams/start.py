@@ -42,9 +42,9 @@ def main() -> None:
     beam_search_generator = BeamSearchTextGenerator(n_gramm, processor, 3)
 
     generated_text_beam_search = beam_search_generator.run('Vernon', 56)
-    print(generated_text_beam_search)
 
     assert result
+    return generated_text_beam_search
 
 
 if __name__ == "__main__":
