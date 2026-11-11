@@ -5,7 +5,7 @@ Beam-search and natural language generation evaluation
 """
 
 # pylint:disable=too-few-public-methods
-import math, time
+import math
 
 
 class TextProcessor:
@@ -59,12 +59,13 @@ class TextProcessor:
         text = text.replace("\n", self._end_of_word_token)
 
         while f"{self._end_of_word_token}{self._end_of_word_token}" in text:
-            text = text.replace(f"{self._end_of_word_token}{self._end_of_word_token}", f"{self._end_of_word_token}")
+            text = text.replace(f"{self._end_of_word_token}{self._end_of_word_token}",
+                                f"{self._end_of_word_token}")
 
         if not text[-1].isalpha():
             text = text.replace(text[-1], self._end_of_word_token)
 
-        result = [i for i in text]
+        result = list(text)
 
         return tuple(result)
 
@@ -166,6 +167,8 @@ class TextProcessor:
         if not len(element) == 1:
             return None
         self._storage[element] = len(self._storage)
+
+        return None
 
     def decode(self, encoded_corpus: tuple[int, ...]) -> str | None:
         """
@@ -414,8 +417,10 @@ class NGramLanguageModel:
             mle = dict_of_frequency.get(n_gramm) / dict_of_freq_starts.get(context)
             self._n_gram_frequencies[n_gramm] = mle
 
-        if self._n_gram_frequencies:
-            return True
+        if not self._n_gram_frequencies:
+            return False
+
+        return True
 
     def generate_next_token(self, sequence: tuple[int, ...]) -> dict | None:
         """
@@ -473,10 +478,6 @@ class NGramLanguageModel:
             return None
 
         encoded_corpus = list(encoded_corpus)
-
-        """while self.__n_gram_size <= len(encoded_corpus):
-            corpus_of_ngrams.append(tuple(encoded_corpus[:self.__n_gram_size]))
-            encoded_corpus.pop(0)"""
 
         res = tuple(tuple(encoded_corpus[i:i + self.__n_gram_size])
                         for i in range(len(encoded_corpus) - self.__n_gram_size + 1))
@@ -538,7 +539,8 @@ class GreedyTextGenerator:
             if not dict_of_predicted:
                 break
 
-            dict_of_predicted = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]), reverse = True)
+            dict_of_predicted = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]),
+                                        reverse = True)
             encoded_text.append(dict_of_predicted[0][0])
 
         text = self._text_processor.decode(tuple(encoded_text))
@@ -594,7 +596,8 @@ class BeamSearcher:
         if not dict_of_predictions:
             return dict_of_predictions
 
-        sorted_dict = sorted(dict_of_predictions.items(), key = lambda x: (x[1], x[0]), reverse = True)
+        sorted_dict = sorted(dict_of_predictions.items(), key = lambda x: (x[1], x[0]),
+                                                                        reverse = True)
 
         return sorted_dict[:self._beam_width]
 
@@ -651,7 +654,7 @@ class BeamSearcher:
             dict_of_fines[token[0]] = fine
 
         candidates_for_sequence = {}
-        for token in dict_of_fines.keys():
+        for token in dict_of_fines:
             continued_sequence = list(sequence)
             continued_sequence.append(token)
             candidates_for_sequence[tuple(continued_sequence)] = dict_of_fines.get(token)
@@ -751,17 +754,22 @@ class BeamSearchTextGenerator:
             dict_of_candidates = {}
             dict_of_candidates[encoded_text] = 0.0
 
-            candidates_for_sequense = self.beam_searcher.continue_sequence(encoded_text,
-                                                                            next_tokens[:self._beam_width],
-                                                                            dict_of_candidates)
-            if not candidates_for_sequense:
+            candidates_for_seq = self.beam_searcher.continue_sequence(
+                                                                    encoded_text,
+                                                                    next_tokens[:self._beam_width],
+                                                                    dict_of_candidates
+                                                                    )
+            if not candidates_for_seq:
                 break
 
-            candidates = self.beam_searcher.prune_sequence_candidates(candidates_for_sequense)
+            candidates = self.beam_searcher.prune_sequence_candidates(candidates_for_seq)
             if not candidates:
                 return None
 
-            encoded_text = dict(zip(candidates.values(), candidates.keys())).get(min(candidates.values()))
+            encoded_text = dict(zip(candidates.values(), candidates.keys())).get(min
+                                                                                (
+                                                                                candidates.values()
+                                                                                ))
 
         text = self._text_processor.decode(encoded_text)
         return text
