@@ -44,7 +44,7 @@ def main() -> None:
     generated_text_beam_search = beam_search_generator.run('Vernon', 56)
 
     assert result
-    return generated_text_beam_search
+    return None
 
 
 if __name__ == "__main__":
