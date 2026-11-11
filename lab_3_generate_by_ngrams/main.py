@@ -375,6 +375,11 @@ class NGramLanguageModel:
         Args:
             frequencies (dict): Computed in advance frequencies for n-grams
         """
+        if not isinstance(frequencies, dict):
+            return None
+
+        self._n_gram_frequencies = frequencies
+        return None
 
     def build(self) -> bool:
         """
@@ -403,10 +408,10 @@ class NGramLanguageModel:
             dict_of_frequency[n_gramm] = dict_of_frequency.get(n_gramm, 0) + 1
 
         corpus_of_starts = []
-        for n_gramm in corpus_of_n_gramms:
-            n_gramm = list(n_gramm)
-            n_gramm.pop(-1)
-            corpus_of_starts.append(tuple(n_gramm))
+        for item in corpus_of_n_gramms:
+            n_gram = list(item)
+            n_gram.pop(-1)
+            corpus_of_starts.append(tuple(n_gram))
 
         dict_of_freq_starts = {}
         for item in corpus_of_starts:
@@ -414,7 +419,7 @@ class NGramLanguageModel:
 
         for n_gramm in set(corpus_of_n_gramms):
             context = n_gramm[:-1]
-            mle = dict_of_frequency.get(n_gramm) / dict_of_freq_starts.get(context)
+            mle = dict_of_frequency[n_gramm] / dict_of_freq_starts[context]
             self._n_gram_frequencies[n_gramm] = mle
 
         if not self._n_gram_frequencies:
@@ -477,10 +482,10 @@ class NGramLanguageModel:
         if not encoded_corpus:
             return None
 
-        encoded_corpus = list(encoded_corpus)
+        corpus = list(encoded_corpus)
 
-        res = tuple(tuple(encoded_corpus[i:i + self.__n_gram_size])
-                        for i in range(len(encoded_corpus) - self.__n_gram_size + 1))
+        res = tuple(tuple(corpus[i:i + self.__n_gram_size])
+                        for i in range(len(corpus) - self.__n_gram_size + 1))
 
         return res
 
@@ -532,18 +537,18 @@ class GreedyTextGenerator:
         if not encoded_text:
             return None
 
-        encoded_text = list(encoded_text)
+        sequence = list(encoded_text)
 
         for _ in range(seq_len + 1):
-            dict_of_predicted = self._model.generate_next_token(tuple(encoded_text))
+            dict_of_predicted = self._model.generate_next_token(tuple(sequence))
             if not dict_of_predicted:
                 break
 
-            dict_of_predicted = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]),
+            dict_of_pred = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]),
                                         reverse = True)
-            encoded_text.append(dict_of_predicted[0][0])
+            sequence.append(dict_of_pred[0][0])
 
-        text = self._text_processor.decode(tuple(encoded_text))
+        text = self._text_processor.decode(tuple(sequence))
         if not text:
             return None
 
@@ -593,7 +598,7 @@ class BeamSearcher:
             return None
 
         dict_of_predictions = self._model.generate_next_token(sequence)
-        if not dict_of_predictions:
+        if not isinstance(dict_of_predictions, dict):
             return dict_of_predictions
 
         sorted_dict = sorted(dict_of_predictions.items(), key = lambda x: (x[1], x[0]),
@@ -624,40 +629,50 @@ class BeamSearcher:
 
         In case of corrupt input arguments or unexpected behaviour of methods used return None.
         """
-        if not all([isinstance(sequence, tuple),
-                    isinstance(next_tokens, list),
-                    isinstance(sequence_candidates, dict)]):
+        if (
+            not isinstance(sequence, tuple)
+            or not sequence
+            or not isinstance(next_tokens, list)
+            or not next_tokens
+        ):
             return None
 
-        if not all([sequence, next_tokens, sequence_candidates]):
+        if not all([
+            isinstance(sequence_candidates, dict),
+            sequence_candidates,
+            len(next_tokens) <= self._beam_width
+        ]):
             return None
 
-        if not all([all(isinstance(i, tuple) for i in next_tokens),
-                    all(isinstance(k, tuple) for k in sequence_candidates.keys()),
-                    all(isinstance(v, float) for v in sequence_candidates.values()),
-                    len(next_tokens) <= self._beam_width,
-                    sequence in sequence_candidates]):
+        if not sequence in sequence_candidates:
             return None
 
-        for tuples in next_tokens:
-            if not all([isinstance(tuples[0], int),
-                        isinstance(tuples[1], float)]):
+        for el in next_tokens:
+            if not all([
+                isinstance(el, tuple),
+                isinstance(el[0], int),
+                isinstance(el[1], float)
+            ]):
                 return None
 
-        for element in sequence_candidates.keys():
-            if not all(isinstance(i, int) for i in element):
+        for key, value in sequence_candidates.items():
+            if not all([isinstance(key, tuple),
+                        all(isinstance(token, int) for token in key),
+                        isinstance(value, (int, float))
+                    ]):
                 return None
 
         dict_of_fines = {}
-        for token in next_tokens:
-            fine = 0.0 - math.log(token[1])
-            dict_of_fines[token[0]] = fine
+        for item in next_tokens:
+            fine = - math.log(item[1])
+            dict_of_fines[item[0]] = fine + sequence_candidates[sequence]
 
-        candidates_for_sequence = {}
-        for token in dict_of_fines:
+        candidates_for_sequence = sequence_candidates.copy()
+        candidates_for_sequence.pop(sequence)
+        for token, probs in dict_of_fines.items():
             continued_sequence = list(sequence)
             continued_sequence.append(token)
-            candidates_for_sequence[tuple(continued_sequence)] = dict_of_fines.get(token)
+            candidates_for_sequence[tuple(continued_sequence)] = probs
 
         return candidates_for_sequence
 
@@ -682,14 +697,14 @@ class BeamSearcher:
             return None
 
         for keys, values in sequence_candidates.items():
-            if not all([isinstance(keys, tuple), isinstance(values, float)]):
+            if not all([isinstance(keys, tuple), isinstance(values, (float, int))]):
                 return None
 
             for i in keys:
                 if not isinstance(i, int):
                     return None
 
-        sorted_dict = sorted(sequence_candidates.items(), key = lambda x: -x[1])
+        sorted_dict = sorted(sequence_candidates.items(), key = lambda x: x[1])
         if len(sequence_candidates) > self._beam_width:
             sorted_dict = sorted_dict[:self._beam_width]
 
@@ -743,16 +758,15 @@ class BeamSearchTextGenerator:
             return None
 
         encoded_text = self._text_processor.encode(prompt)
-        if not encoded_text:
+        if not isinstance(encoded_text, tuple):
             return None
 
         for _ in range(seq_len + 1):
             next_tokens = self._get_next_token(encoded_text)
-            if not next_tokens:
+            if not isinstance(next_tokens, list):
                 return None
 
-            dict_of_candidates = {}
-            dict_of_candidates[encoded_text] = 0.0
+            dict_of_candidates = {encoded_text: 0.0}
 
             candidates_for_seq = self.beam_searcher.continue_sequence(
                                                                     encoded_text,
@@ -766,13 +780,13 @@ class BeamSearchTextGenerator:
             if not candidates:
                 return None
 
-            encoded_text = dict(zip(candidates.values(), candidates.keys())).get(min
+            encoded_text = tuple(dict(zip(candidates.values(), candidates.keys()))[(min
                                                                                 (
                                                                                 candidates.values()
-                                                                                ))
+                                                                                ))])
 
-        text = self._text_processor.decode(encoded_text)
-        return text
+        return self._text_processor.decode(encoded_text)
+
 
     def _get_next_token(
         self, sequence_to_continue: tuple[int, ...]
