@@ -26,6 +26,8 @@ def main() -> None:
     processor = TextProcessor("_")
 
     encoded_text = processor.encode(text)
+    if not isinstance(encoded_text, tuple):
+        return None
 
     result = processor.decode(encoded_text)
 
