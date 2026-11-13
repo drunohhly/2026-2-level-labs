@@ -5,7 +5,7 @@ Beam-search and natural language generation evaluation
 """
 
 # pylint:disable=too-few-public-methods
-import math
+import math, json
 
 
 class TextProcessor:
@@ -209,11 +209,17 @@ class TextProcessor:
         Args:
             content (dict): ngrams from external JSON
         """
-        for n_gramm in content.keys():
-            for letter in set(n_gramm):
+        if not isinstance(content, dict):
+            return None
+
+        if not content:
+            return None
+
+        for dictionary in list(content.values())[0]:
+            for letter in dictionary:
                 if letter.isalpha():
                     if letter.lower() in self._storage:
-                        break
+                        continue
                     self._put(letter.lower())
 
     def _decode(self, corpus: tuple[int, ...]) -> tuple[str, ...] | None:
@@ -275,7 +281,7 @@ class TextProcessor:
         if self._end_of_word_token in text[:-1]:
             text = text[:-1].replace(self._end_of_word_token, " ")
 
-        text = f"{text[0].upper()}{text[1:]}"
+        text = text.capitalize()
 
         if text[-1] == self._end_of_word_token:
             text = text.replace(self._end_of_word_token, ".")
@@ -456,6 +462,7 @@ class NGramLanguageModel:
             if context == n_gramm[:self.__n_gram_size - 1]:
                 corpus_of_possible_token.append(n_gramm)
 
+
         dict_of_predictions = {}
         for item in corpus_of_possible_token:
             dict_of_predictions[item[-1]] = self._n_gram_frequencies.get(item)
@@ -485,9 +492,10 @@ class NGramLanguageModel:
         corpus = list(encoded_corpus)
 
         res = tuple(tuple(corpus[i:i + self.__n_gram_size])
-                        for i in range(len(corpus) - self.__n_gram_size + 1))
+                for i in range(len(corpus) - self.__n_gram_size + 1))
 
         return res
+
 
 class GreedyTextGenerator:
     """
@@ -544,9 +552,8 @@ class GreedyTextGenerator:
             if not dict_of_predicted:
                 break
 
-            dict_of_pred = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]),
-                                        reverse = True)
-            sequence.append(dict_of_pred[0][0])
+            pred = sorted(dict_of_predicted.items(), key = lambda x: (x[1], x[0]), reverse = True)
+            sequence.append(pred[0][0])
 
         text = self._text_processor.decode(tuple(sequence))
         if not text:
@@ -823,6 +830,13 @@ class NGramLanguageModelReader:
             json_path (str): Local path to assets file
             eow_token (str): Special token for text processor
         """
+        self._json_path = json_path
+        self._eow_token = eow_token
+        with open (json_path) as file:
+            self._content = json.load(file)
+        self._text_processor = TextProcessor(eow_token)
+        self._text_processor.fill_from_ngrams(self._content)
+
 
     def load(self, n_gram_size: int) -> NGramLanguageModel | None:
         """
@@ -840,6 +854,47 @@ class NGramLanguageModelReader:
         In case of corrupt input arguments or unexpected behaviour of methods used,
         None is returned.
         """
+        if not isinstance(n_gram_size, int):
+            return None
+
+        if n_gram_size <= 0:
+            return None
+
+        n_grams = {}
+        clean_key = ""
+        for key in list(self._content.values())[0]:
+            for letter in key.lower():
+                cleaned_key = key.replace(" ", self._eow_token).lower()
+                for letter in cleaned_key:
+                    if letter.isalpha() or letter == self._eow_token:
+                        clean_key = f"{clean_key}{letter}"
+
+                """if letter == " ":
+                    key = key.replace(" ", self._eow_token)
+                if not letter.isalpha() or not letter == " ":
+                    key = key.replace(letter, "")
+                cleaned_key = cleaned_key.join(key)"""
+                if len(clean_key) != n_gram_size:
+                    continue
+                n_grams[clean_key] = list(self._content.values())[0].get(key)
+
+        n_grams_encoded = {}
+        for key in n_grams:
+            n_grams_encode = tuple([self._text_processor.get_id(i) for i in key])
+            n_grams_encoded[n_grams_encode] = n_grams.get(key)
+
+
+        dict_of_freq = {}
+        for item in n_grams_encoded.keys():
+            for keys in n_grams_encoded:
+                context_n_grams = tuple([i for i in keys if keys[:-1] == item[:-1]])
+            dict_of_freq[item] = n_grams_encoded.get(item) / len(context_n_grams)
+
+        model = NGramLanguageModel(None, n_gram_size)
+        model.set_n_grams(dict_of_freq)
+
+        return model
+
 
     def get_text_processor(self) -> TextProcessor:  # type: ignore[empty-body]
         """
@@ -848,6 +903,7 @@ class NGramLanguageModelReader:
         Returns:
             TextProcessor: processor created for the current JSON file.
         """
+        return self._text_processor
 
 class BackOffGenerator:
     """
