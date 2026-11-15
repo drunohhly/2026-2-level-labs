@@ -955,10 +955,8 @@ class NGramLanguageModelReader:
         if n_gram_size < 2:
             return None
 
-        dict_with_ngrams = list((self._content.values()))[0]
-
         n_grams = {}
-        for key in dict_with_ngrams:
+        for key in list((self._content.values()))[0]:
             clean_key = ""
             original_ngramm = key
             for letter in key.lower():
@@ -979,9 +977,11 @@ class NGramLanguageModelReader:
                         continue
 
                     if encoded_ngram in n_grams:
-                        n_grams[encoded_ngram] += dict_with_ngrams.get(original_ngramm)
+                        n_grams[encoded_ngram] += list(
+                            (self._content.values()))[0].get(original_ngramm)
                     else:
-                        n_grams[encoded_ngram] = dict_with_ngrams.get(original_ngramm)
+                        n_grams[encoded_ngram] = list(
+                            (self._content.values()))[0].get(original_ngramm)
 
         dict_of_contexts = {}
         for ngramm in n_grams:
