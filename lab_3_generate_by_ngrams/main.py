@@ -5,10 +5,9 @@ Beam-search and natural language generation evaluation
 """
 
 import json
-
-# pylint:disable=too-few-public-methods
 import math
 
+# pylint:disable=too-few-public-methods, too-many-lines, too-many-branches, consider-using-dict-items
 
 class TextProcessor:
     """
@@ -224,6 +223,8 @@ class TextProcessor:
                         continue
                     self._put(letter.lower())
 
+        return None
+
     def _decode(self, corpus: tuple[int, ...]) -> tuple[str, ...] | None:
         """
         Decode sentence by replacing ids with corresponding letters.
@@ -329,14 +330,19 @@ class WordProcessor(TextProcessor):
             preprocessed_text = preprocessed_text.replace(sym, self._end_of_word_token)
 
         while f"{self._end_of_word_token}{self._end_of_word_token}" in preprocessed_text:
-            preprocessed_text = preprocessed_text.replace(f"{self._end_of_word_token}{self._end_of_word_token}",
-                                                                                    f"{self._end_of_word_token}")
+            preprocessed_text = preprocessed_text.replace(
+                                            f"{self._end_of_word_token}{self._end_of_word_token}",
+                                            f"{self._end_of_word_token}")
 
         if f"{self._end_of_word_token}" in preprocessed_text:
-            preprocessed_text = preprocessed_text.replace(f"{self._end_of_word_token}", f" {self._end_of_word_token}")
+            preprocessed_text = preprocessed_text.replace(f"{self._end_of_word_token}",
+                                                        f" {self._end_of_word_token}")
 
         for letter in preprocessed_text:
-            if not any([letter.isalpha(), letter in self._end_of_word_token, letter == " ", letter == "'"]):
+            if not any([letter.isalpha(),
+                        letter in self._end_of_word_token,
+                        letter == " ",
+                        letter == "'"]):
                 preprocessed_text = preprocessed_text.replace(letter, " ")
             if letter == "'":
                 preprocessed_text = preprocessed_text.replace(letter, "")
@@ -418,7 +424,7 @@ class WordProcessor(TextProcessor):
                     full_text = f"{full_text}{sentence}"
                 sentence = ""
                 continue
-            elif index == len(decoded_text) - 1:
+            if index == len(decoded_text) - 1:
                 sentence = f"{sentence}{word}."
                 sentence = sentence.capitalize()
                 full_text = f"{full_text}{sentence}"
@@ -921,7 +927,7 @@ class NGramLanguageModelReader:
         """
         self._json_path = json_path
         self._eow_token = eow_token
-        with open (json_path) as file:
+        with open (json_path, encoding="utf-8") as file:
             self._content = json.load(file)
         self._text_processor = TextProcessor(eow_token)
         self._text_processor.fill_from_ngrams(self._content)
@@ -968,28 +974,26 @@ class NGramLanguageModelReader:
                         if code is None:
                             break
                         encoded_ngramm.append(code)
-                    encoded_ngramm = tuple(encoded_ngramm)
-                    if not encoded_ngramm:
+                    encoded_ngram = tuple(encoded_ngramm)
+                    if not encoded_ngram:
                         continue
 
-                    if encoded_ngramm in n_grams:
-                        n_grams[encoded_ngramm] += dict_with_ngrams.get(original_ngramm)
+                    if encoded_ngram in n_grams:
+                        n_grams[encoded_ngram] += dict_with_ngrams.get(original_ngramm)
                     else:
-                        n_grams[encoded_ngramm] = dict_with_ngrams.get(original_ngramm)
+                        n_grams[encoded_ngram] = dict_with_ngrams.get(original_ngramm)
 
         dict_of_contexts = {}
-        for ngramm in n_grams.keys():
-            context = ngramm[:-1]
-            if context in dict_of_contexts:
-                dict_of_contexts[context] += n_grams[ngramm]
+        for ngramm in n_grams:
+            if ngramm[:-1] in dict_of_contexts:
+                dict_of_contexts[ngramm[:-1]] += n_grams[ngramm]
             else:
-                dict_of_contexts[context] = n_grams[ngramm]
+                dict_of_contexts[ngramm[:-1]] = n_grams[ngramm]
 
         dict_of_freq = {}
         for n_gram in n_grams:
-            context = n_gram[:-1]
-            if context in dict_of_contexts:
-                dict_of_freq[n_gram] = n_grams[n_gram] / dict_of_contexts[context]
+            if n_gram[:-1] in dict_of_contexts:
+                dict_of_freq[n_gram] = n_grams[n_gram] / dict_of_contexts[n_gram[:-1]]
 
         model = NGramLanguageModel(None, n_gram_size)
         model.set_n_grams(dict_of_freq)
@@ -1099,7 +1103,6 @@ class BackOffGenerator:
             next_tokens = item.generate_next_token(sequence_to_continue)
             if not next_tokens:
                 continue
-            else:
-                return next_tokens
+            return next_tokens
 
         return None

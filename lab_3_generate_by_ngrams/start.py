@@ -10,7 +10,7 @@ from lab_3_generate_by_ngrams.main import (
     NGramLanguageModel,
     NGramLanguageModelReader,
     TextProcessor,
-    WordProcessor
+    WordProcessor,
 )
 
 
@@ -52,7 +52,10 @@ def main() -> None:
     models = []
     for i in range(2, 5):
         model = reader.load(i)
+        if not model:
+            return None
         models.append(model)
+
 
     back_off_generator = BackOffGenerator(tuple(models), processor)
     generated_back_off = back_off_generator.run("Vernon", 100)
@@ -78,10 +81,13 @@ def main() -> None:
     beam_word = beam_search_word.run("Harry looked at", 12)
     print(beam_word)
 
-    backoff_word = BackOffGenerator((model_with_bigram, model_with_trigram, model_with_tetragram), word_processor)
+    backoff_word = BackOffGenerator((model_with_bigram, model_with_trigram, model_with_tetragram),
+                                                                                    word_processor)
     back_word = backoff_word.run("Harry looked at", 12)
     print(back_word)
 
+    same_in_syms = textgenerator.run("Harry looked at", 60)
+    print(same_in_syms)
     assert result
     return None
 
