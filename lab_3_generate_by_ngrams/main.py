@@ -4,8 +4,10 @@ Lab 3.
 Beam-search and natural language generation evaluation
 """
 
+import json
+
 # pylint:disable=too-few-public-methods
-import math, json
+import math
 
 
 class TextProcessor:
@@ -215,8 +217,8 @@ class TextProcessor:
         if not content:
             return None
 
-        for dictionary in list(content.values())[0]:
-            for letter in dictionary:
+        for key in list(content.values())[0]:
+            for letter in key:
                 if letter.isalpha():
                     if letter.lower() in self._storage:
                         continue
@@ -315,6 +317,41 @@ class WordProcessor(TextProcessor):
         In case of corrupt input arguments, None is returned.
         In case text does not contain any words, None is returned.
         """
+        if not isinstance(text, str):
+            return None
+
+        if any([not text, text.isdigit()]):
+            return None
+
+        syms_to_del = [".", "?", "!"]
+        preprocessed_text = text.lower()
+        for sym in syms_to_del:
+            preprocessed_text = preprocessed_text.replace(sym, self._end_of_word_token)
+
+        while f"{self._end_of_word_token}{self._end_of_word_token}" in preprocessed_text:
+            preprocessed_text = preprocessed_text.replace(f"{self._end_of_word_token}{self._end_of_word_token}",
+                                                                                    f"{self._end_of_word_token}")
+
+        if f"{self._end_of_word_token}" in preprocessed_text:
+            preprocessed_text = preprocessed_text.replace(f"{self._end_of_word_token}", f" {self._end_of_word_token}")
+
+        for letter in preprocessed_text:
+            if not any([letter.isalpha(), letter in self._end_of_word_token, letter == " ", letter == "'"]):
+                preprocessed_text = preprocessed_text.replace(letter, " ")
+            if letter == "'":
+                preprocessed_text = preprocessed_text.replace(letter, "")
+        result = tuple(preprocessed_text.split())
+
+        list_of_letters = []
+        for token in result:
+            if not token.isalpha():
+                continue
+            list_of_letters.append(token)
+
+        if not list_of_letters:
+            return None
+
+        return result
 
     def _put(self, element: str) -> None:
         """
@@ -325,6 +362,15 @@ class WordProcessor(TextProcessor):
 
         In case of corrupt input arguments, an element is not added to storage
         """
+        if not isinstance(element, str):
+            return None
+        if not element:
+            return None
+        if element not in self._storage:
+            self._storage[element] = len(self._storage)
+
+        return None
+
 
     def _postprocess_decoded_text(self, decoded_corpus: tuple[str, ...]) -> str | None:
         """
@@ -342,6 +388,51 @@ class WordProcessor(TextProcessor):
         In case of corrupt input arguments, None is returned.
         In case decoded corpus does not contain any words, None is returned.
         """
+        if not isinstance(decoded_corpus, tuple):
+            return None
+
+        if not decoded_corpus:
+            return None
+
+        list_of_words = []
+        for word in decoded_corpus:
+            if not isinstance(word, str):
+                return None
+            if word.isalpha():
+                list_of_words.append(word)
+
+        if not list_of_words:
+            return None
+
+        decoded_text = list(decoded_corpus)
+
+        full_text = ""
+        sentence = ""
+        for index, word in enumerate(decoded_text):
+            if word == self._end_of_word_token:
+                sentence = f"{sentence}."
+                sentence = sentence.capitalize()
+                if full_text:
+                    full_text = f"{full_text} {sentence}"
+                else:
+                    full_text = f"{full_text}{sentence}"
+                sentence = ""
+                continue
+            elif index == len(decoded_text) - 1:
+                sentence = f"{sentence}{word}."
+                sentence = sentence.capitalize()
+                full_text = f"{full_text}{sentence}"
+                continue
+            if not sentence:
+                sentence = f"{sentence}{word}"
+            else:
+                sentence = f"{sentence} {word}"
+
+        for letter in full_text:
+            if f".{letter}" in full_text and letter.isalpha():
+                full_text = full_text.replace(f".{letter}", f". {letter}")
+
+        return full_text
 
 class NGramLanguageModel:
     """
@@ -496,7 +587,6 @@ class NGramLanguageModel:
 
         return res
 
-
 class GreedyTextGenerator:
     """
     Greedy text generation by N-grams.
@@ -612,7 +702,6 @@ class BeamSearcher:
                                                                         reverse = True)
 
         return sorted_dict[:self._beam_width]
-
 
     def continue_sequence(
         self,
@@ -857,38 +946,50 @@ class NGramLanguageModelReader:
         if not isinstance(n_gram_size, int):
             return None
 
-        if n_gram_size <= 0:
+        if n_gram_size < 2:
             return None
 
+        dict_with_ngrams = list((self._content.values()))[0]
+
         n_grams = {}
-        clean_key = ""
-        for key in list(self._content.values())[0]:
+        for key in dict_with_ngrams:
+            clean_key = ""
+            original_ngramm = key
             for letter in key.lower():
-                cleaned_key = key.replace(" ", self._eow_token).lower()
-                for letter in cleaned_key:
+                key = key.replace(" ", self._eow_token).lower()
+                for letter in key:
                     if letter.isalpha() or letter == self._eow_token:
                         clean_key = f"{clean_key}{letter}"
 
-                """if letter == " ":
-                    key = key.replace(" ", self._eow_token)
-                if not letter.isalpha() or not letter == " ":
-                    key = key.replace(letter, "")
-                cleaned_key = cleaned_key.join(key)"""
-                if len(clean_key) != n_gram_size:
-                    continue
-                n_grams[clean_key] = list(self._content.values())[0].get(key)
+                if len(clean_key) == n_gram_size:
+                    encoded_ngramm = []
+                    for letter in clean_key:
+                        code = self._text_processor.get_id(letter)
+                        if code is None:
+                            break
+                        encoded_ngramm.append(code)
+                    encoded_ngramm = tuple(encoded_ngramm)
+                    if not encoded_ngramm:
+                        continue
 
-        n_grams_encoded = {}
-        for key in n_grams:
-            n_grams_encode = tuple([self._text_processor.get_id(i) for i in key])
-            n_grams_encoded[n_grams_encode] = n_grams.get(key)
+                    if encoded_ngramm in n_grams:
+                        n_grams[encoded_ngramm] += dict_with_ngrams.get(original_ngramm)
+                    else:
+                        n_grams[encoded_ngramm] = dict_with_ngrams.get(original_ngramm)
 
+        dict_of_contexts = {}
+        for ngramm in n_grams.keys():
+            context = ngramm[:-1]
+            if context in dict_of_contexts:
+                dict_of_contexts[context] += n_grams[ngramm]
+            else:
+                dict_of_contexts[context] = n_grams[ngramm]
 
         dict_of_freq = {}
-        for item in n_grams_encoded.keys():
-            for keys in n_grams_encoded:
-                context_n_grams = tuple([i for i in keys if keys[:-1] == item[:-1]])
-            dict_of_freq[item] = n_grams_encoded.get(item) / len(context_n_grams)
+        for n_gram in n_grams:
+            context = n_gram[:-1]
+            if context in dict_of_contexts:
+                dict_of_freq[n_gram] = n_grams[n_gram] / dict_of_contexts[context]
 
         model = NGramLanguageModel(None, n_gram_size)
         model.set_n_grams(dict_of_freq)
@@ -925,6 +1026,12 @@ class BackOffGenerator:
                 Language models to use for text generation
             text_processor (TextProcessor): A TextProcessor instance to handle text processing
         """
+        self._language_models = {}
+        for item in language_models:
+            size = item.get_n_gram_size()
+            self._language_models[size] = item
+
+        self._text_processor = text_processor
 
     def run(self, prompt: str, seq_len: int) -> str | None:
         """
@@ -940,6 +1047,29 @@ class BackOffGenerator:
         In case of corrupt input arguments or methods used return None,
         None is returned
         """
+        if not all([isinstance(prompt, str), isinstance(seq_len, int)]):
+            return None
+
+        if not all([prompt, seq_len > 0]):
+            return None
+
+        encoded_text = self._text_processor.encode(prompt)
+        if not encoded_text:
+            return None
+
+        sequence = list(encoded_text)
+
+        for _ in range(seq_len + 1):
+            next_tokens = self._get_next_token(tuple(sequence))
+            if next_tokens is None:
+                return None
+            if not next_tokens:
+                break
+            sorted_next_tokens = sorted(next_tokens.items(), key = lambda x: (-x[1], -x[0]))
+            sequence.append(sorted_next_tokens[0][0])
+
+        text = self._text_processor.decode(tuple(sequence))
+        return text
 
     def _get_next_token(self, sequence_to_continue: tuple[int, ...]) -> dict[int, float] | None:
         """
@@ -953,3 +1083,23 @@ class BackOffGenerator:
 
         In case of corrupt input arguments return None.
         """
+        if not isinstance(sequence_to_continue, tuple):
+            return None
+
+        if not sequence_to_continue:
+            return None
+
+        for element in sequence_to_continue:
+            if not isinstance(element, int):
+                return None
+
+        sorted_sizes = dict(sorted(self._language_models.items(), key = lambda x: -x[0]))
+
+        for item in sorted_sizes.values():
+            next_tokens = item.generate_next_token(sequence_to_continue)
+            if not next_tokens:
+                continue
+            else:
+                return next_tokens
+
+        return None

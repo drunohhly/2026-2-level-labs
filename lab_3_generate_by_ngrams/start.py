@@ -4,10 +4,13 @@ Generation by NGrams starter
 
 # pylint:disable=too-many-locals, unused-import, unused-variable
 from lab_3_generate_by_ngrams.main import (
+    BackOffGenerator,
     BeamSearchTextGenerator,
     GreedyTextGenerator,
     NGramLanguageModel,
+    NGramLanguageModelReader,
     TextProcessor,
+    WordProcessor
 )
 
 
@@ -43,6 +46,41 @@ def main() -> None:
 
     generated_text_beam_search = beam_search_generator.run('Vernon', 56)
     print(generated_text_beam_search)
+
+    reader = NGramLanguageModelReader("lab_3_generate_by_ngrams/assets/en_own.json", "_")
+
+    models = []
+    for i in range(2, 5):
+        model = reader.load(i)
+        models.append(model)
+
+    back_off_generator = BackOffGenerator(tuple(models), processor)
+    generated_back_off = back_off_generator.run("Vernon", 100)
+    print(generated_back_off)
+
+    result = generated_back_off
+
+    word_processor = WordProcessor('<eos>')
+    encoded_txt = word_processor.encode(text)
+
+    model_with_bigram = NGramLanguageModel(encoded_txt, 2)
+    model_with_bigram.build()
+    model_with_trigram = NGramLanguageModel(encoded_txt, 3)
+    model_with_trigram.build()
+    model_with_tetragram = NGramLanguageModel(encoded_txt, 4)
+    model_with_tetragram.build()
+
+    word_greedy_generator = GreedyTextGenerator(model_with_tetragram, word_processor)
+    greedy_word = word_greedy_generator.run("Harry looked at", 12)
+    print(greedy_word)
+
+    beam_search_word = BeamSearchTextGenerator(model_with_tetragram, word_processor, 3)
+    beam_word = beam_search_word.run("Harry looked at", 12)
+    print(beam_word)
+
+    backoff_word = BackOffGenerator((model_with_bigram, model_with_trigram, model_with_tetragram), word_processor)
+    back_word = backoff_word.run("Harry looked at", 12)
+    print(back_word)
 
     assert result
     return None
