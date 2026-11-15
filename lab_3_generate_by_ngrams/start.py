@@ -32,20 +32,20 @@ def main() -> None:
     if not isinstance(encoded_text, tuple):
         return None
 
-    result = processor.decode(encoded_text)
+    decoded_text = processor.decode(encoded_text)
 
     n_gramm = NGramLanguageModel(encoded_text, 7)
-    mle = n_gramm.build()
+    n_gramm.build()
 
     textgenerator = GreedyTextGenerator(n_gramm, processor)
     generated_text = textgenerator.run('Vernon', 51)
 
-    print(generated_text)
+    print(f"Greedy algorithm (symbols): {generated_text}")
 
     beam_search_generator = BeamSearchTextGenerator(n_gramm, processor, 3)
 
     generated_text_beam_search = beam_search_generator.run('Vernon', 56)
-    print(generated_text_beam_search)
+    print(f"Beam search algorithm(symbols): {generated_text_beam_search}")
 
     reader = NGramLanguageModelReader("lab_3_generate_by_ngrams/assets/en_own.json", "_")
 
@@ -59,7 +59,7 @@ def main() -> None:
 
     back_off_generator = BackOffGenerator(tuple(models), processor)
     generated_back_off = back_off_generator.run("Vernon", 100)
-    print(generated_back_off)
+    print(f"BackOff Algorithm (symbols): {generated_back_off}")
 
     result = generated_back_off
 
@@ -75,19 +75,19 @@ def main() -> None:
 
     word_greedy_generator = GreedyTextGenerator(model_with_tetragram, word_processor)
     greedy_word = word_greedy_generator.run("Harry looked at", 12)
-    print(greedy_word)
+    print(f"Greedy Algorithm (words): {greedy_word}")
 
     beam_search_word = BeamSearchTextGenerator(model_with_tetragram, word_processor, 3)
     beam_word = beam_search_word.run("Harry looked at", 12)
-    print(beam_word)
+    print(f"Beam search Algorithm (words): {beam_word}")
 
     backoff_word = BackOffGenerator((model_with_bigram, model_with_trigram, model_with_tetragram),
                                                                                     word_processor)
     back_word = backoff_word.run("Harry looked at", 12)
-    print(back_word)
+    print(f"BackOff Algorithm (words): {back_word}")
 
     same_in_syms = textgenerator.run("Harry looked at", 60)
-    print(same_in_syms)
+    print(f"Greedy Algorithm (symbols): {same_in_syms}")
     assert result
     return None
 
