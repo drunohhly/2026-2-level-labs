@@ -2,16 +2,7 @@
 Generation by NGrams starter
 """
 
-# pylint:disable=too-many-locals
-from lab_3_generate_by_ngrams.main import (
-    BackOffGenerator,
-    BeamSearchTextGenerator,
-    GreedyTextGenerator,
-    NGramLanguageModel,
-    NGramLanguageModelReader,
-    TextProcessor,
-    WordProcessor,
-)
+# pylint:disable=too-many-locals, unused-import, unused-variable
 
 from lab_3_generate_by_ngrams.main import (
     BackOffGenerator,
@@ -129,7 +120,6 @@ def main() -> None:
 
     result = backoff_generated
     assert result
-    return None
 
 
 if __name__ == "__main__":
