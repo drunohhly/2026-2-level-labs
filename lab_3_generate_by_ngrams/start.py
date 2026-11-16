@@ -2,7 +2,7 @@
 Generation by NGrams starter
 """
 
-# pylint:disable=too-many-locals, unused-import, unused-variable
+# pylint:disable=too-many-locals
 from lab_3_generate_by_ngrams.main import (
     BackOffGenerator,
     BeamSearchTextGenerator,
@@ -32,7 +32,7 @@ def main() -> None:
     if not isinstance(encoded_text, tuple):
         return None
 
-    decoded_text = processor.decode(encoded_text)
+    result = processor.decode(encoded_text)
 
     n_gramm = NGramLanguageModel(encoded_text, 7)
     n_gramm.build()
