@@ -61,7 +61,7 @@ class Sentence:
 
         Returns:
             bool: True if both are Sentence instances with the same text and position,
-            otherwise False.
+              otherwise False.
         """
 
     def __hash__(self) -> int:
@@ -108,22 +108,6 @@ class Sentence:
         """
         return self._preprocessed
 
-    def set_preprocessed(self, preprocessed_sentence: PreprocessedSentence) -> None:
-        """
-        Sets the preprocessed representation of the sentence.
-
-        Args:
-            preprocessed_sentence (PreprocessedSentence): Preprocessed sequence of tokens.
-        """
-        if not isinstance(preprocessed_sentence, PreprocessedSentence):
-            raise IncorrectArgumentError("Incorrect input value")
-
-        if not all(isinstance(i, str) for i in preprocessed_sentence):
-            raise IncorrectArgumentError("Incorrect input value")
-        self._preprocessed = preprocessed_sentence
-
-        return None
-
     def get_text(self) -> str:
         """
         Returns the text of the sentence.
@@ -155,6 +139,14 @@ class Sentence:
         Args:
             preprocessed_sentence (PreprocessedSentence): Preprocessed sequence of tokens.
         """
+        if not isinstance(preprocessed_sentence, PreprocessedSentence):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        if not all(isinstance(i, str) for i in preprocessed_sentence):
+            raise IncorrectArgumentError("Incorrect input value")
+        self._preprocessed = preprocessed_sentence
+
+        return None
 
 
 class SentencePreprocessor:
