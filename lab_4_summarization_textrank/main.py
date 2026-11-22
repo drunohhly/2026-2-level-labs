@@ -131,7 +131,6 @@ class Sentence:
             raise IncorrectArgumentError("Incorrect input value")
         self._encoded = encoded_sentence
 
-
     def set_preprocessed(self, preprocessed_sentence: PreprocessedSentence) -> None:
         """
         Sets the preprocessed representation of the sentence.
@@ -185,6 +184,7 @@ class SentencePreprocessor:
         Returns:
             str: String representation of the preprocessor.
         """
+        return f"SentencePreprocessor(stop_words={len(self._stop_words)}, punctuation={len(self._punctuation)})"
 
     def _clean_and_tokenize(self, text: str) -> tuple[str, ...]:
         """
@@ -212,6 +212,8 @@ class SentencePreprocessor:
         Args:
             sentences (Sequence[Sentence]): Sequence of sentences to preprocess.
         """
+        for sentence in sentences:
+            sentence.set_preprocessed(self.preprocess_text(sentence.get_text()))
 
     def _remove_stop_words(self, tokens: Sequence[str]) -> tuple[str, ...]:
         """
@@ -271,6 +273,12 @@ class SentencePreprocessor:
         Returns:
             tuple[Sentence, ...]: Sequence of preprocessed sentences extracted from the text.
         """
+        if not isinstance(text, str):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        sentences = self._split_by_sentence(text)
+        self._preprocess_sentences(sentences)
+        return sentences
 
     def preprocess_text(self, text: str) -> tuple[str, ...]:
         """
