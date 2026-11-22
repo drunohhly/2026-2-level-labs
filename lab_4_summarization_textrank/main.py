@@ -212,6 +212,11 @@ class SentencePreprocessor:
         Args:
             sentences (Sequence[Sentence]): Sequence of sentences to preprocess.
         """
+        if not isinstance(sentences, Sequence):
+            raise IncorrectArgumentError("Incorrect input value")
+        if not all(isinstance(s, Sentence) for s in sentences):
+            raise IncorrectArgumentError("Incorrect input value")
+
         for sentence in sentences:
             sentence.set_preprocessed(self.preprocess_text(sentence.get_text()))
 
@@ -310,6 +315,7 @@ class SentenceEncoder:
         """
         Initializes the sentence encoder.
         """
+
 
     def __str__(self) -> str:
         """
