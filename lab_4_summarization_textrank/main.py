@@ -124,7 +124,7 @@ class Sentence:
         Args:
             encoded_sentence (EncodedSentence): Encoded sequence of integers.
         """
-        if not isinstance(encoded_sentence, EncodedSentence):
+        if not isinstance(encoded_sentence, tuple):
             raise IncorrectArgumentError("Incorrect input value")
 
         if not all(isinstance(i, int) for i in encoded_sentence):
@@ -138,7 +138,7 @@ class Sentence:
         Args:
             preprocessed_sentence (PreprocessedSentence): Preprocessed sequence of tokens.
         """
-        if not isinstance(preprocessed_sentence, PreprocessedSentence):
+        if not isinstance(preprocessed_sentence, tuple):
             raise IncorrectArgumentError("Incorrect input value")
 
         if not all(isinstance(i, str) for i in preprocessed_sentence):
@@ -363,7 +363,8 @@ class SentenceEncoder:
         for sentence in sentences:
             tokens = sentence.get_preprocessed()
             self._learn_indices(tokens)
-            sentence.set_encoded(self._word2id[token] for token in tokens)
+
+            sentence.set_encoded(tuple(self._word2id[token] for token in tokens))
 
 def calculate_similarity(sequence: Sequence, other_sequence: Sequence) -> float:
     """
@@ -376,6 +377,11 @@ def calculate_similarity(sequence: Sequence, other_sequence: Sequence) -> float:
     Returns:
         float: Jaccard similarity score between the two sequences.
     """
+    if not all([isinstance(sequence, Sequence), isinstance(other_sequence, Sequence)]):
+        raise IncorrectArgumentError("Incorrect input value")
+    if not all([sequence, other_sequence]):
+        return 0.0
+    return float(len((set(sequence) & set(other_sequence))) / len((set(sequence) | set(other_sequence))))
 
 
 class TextGraph:
@@ -391,6 +397,8 @@ class TextGraph:
         """
         Initializes an empty similarity graph.
         """
+        self._vertices = []
+        self._matrix = []
 
     def __len__(self) -> int:
         """
