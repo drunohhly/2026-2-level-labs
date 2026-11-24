@@ -63,6 +63,9 @@ class Sentence:
             bool: True if both are Sentence instances with the same text and position,
               otherwise False.
         """
+        if not isinstance(other, Sentence):
+            return False
+        return all([self._text == other._text, self._position == other._position])
 
     def __hash__(self) -> int:
         """
@@ -71,6 +74,7 @@ class Sentence:
         Returns:
             int: Hash value based on the text and position.
         """
+        return hash((self._text, self._position))
 
     def __str__(self) -> str:
         """
@@ -258,15 +262,15 @@ class SentencePreprocessor:
         if not isinstance(text, str):
             raise IncorrectArgumentError("Incorrect input value")
 
-        #я попозже переименую переменную чтобы не перезаписывать и удалю комент
-        while "  " in text or "\n" in text:
-            text = text.replace("  ", " ").strip()
-            text = text.replace("\n", " ")
+        preprocess_text = text
+        while "  " in preprocess_text or "\n" in preprocess_text:
+            preprocess_text = preprocess_text.replace("  ", " ").strip()
+            preprocess_text = preprocess_text.replace("\n", " ")
 
         for punc in [". ", "? ", "! "]:
-            text = text.replace(punc, f"{punc}~ ")
+            preprocess_text = preprocess_text.replace(punc, f"{punc}~ ")
 
-        return tuple(Sentence(i.strip(), position) for position, i in enumerate(text.split("~ ")))
+        return tuple(Sentence(i.strip(), position) for position, i in enumerate(preprocess_text.split("~ ")))
 
     def get_sentences(self, text: str) -> tuple[Sentence, ...]:
         """
@@ -366,6 +370,7 @@ class SentenceEncoder:
 
             sentence.set_encoded(tuple(self._word2id[token] for token in tokens))
 
+
 def calculate_similarity(sequence: Sequence, other_sequence: Sequence) -> float:
     """
     Calculates the similarity between two sequences using the Jaccard index.
@@ -432,6 +437,19 @@ class TextGraph:
         Args:
             vertex (Sentence): Vertex to add to the graph.
         """
+        if not isinstance(vertex, Sentence):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        if vertex not in self._vertices:
+            self._vertices.append(vertex)
+
+            if not self._matrix:
+                self._matrix.append([0.0])
+            else:
+                for row in self._matrix:
+                    row.append(0.0)
+
+                self._matrix.append([0.0 for _ in range (len(self._matrix[0]))])
 
     def build(self, sentences: Sequence[Sentence]) -> None:
         """
