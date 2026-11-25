@@ -49,8 +49,8 @@ class Sentence:
             raise IncorrectArgumentError("Incorrect input value")
         self._text = text
         self._position = position
-        self._preprocessed = ()
-        self._encoded = ()
+        self._preprocessed: tuple[str, ...] = ()
+        self._encoded: tuple[int, ...] = ()
 
     def __eq__(self, other: object) -> bool:
         """
@@ -64,7 +64,7 @@ class Sentence:
               otherwise False.
         """
         if not isinstance(other, Sentence):
-            return False
+            raise IncorrectArgumentError("Incorrect input value")
         return all([self._text == other._text, self._position == other._position])
 
     def __hash__(self) -> int:
@@ -83,7 +83,7 @@ class Sentence:
         Returns:
             str: String representation of the sentence.
         """
-        return f"Sentence(text={self._text}, position={self._position})"
+        return f"Sentence(text={self.get_text()}, position={self.get_position()})"
 
     def get_encoded(self) -> EncodedSentence:
         """
@@ -149,8 +149,6 @@ class Sentence:
             raise IncorrectArgumentError("Incorrect input value")
         self._preprocessed = preprocessed_sentence
 
-        return None
-
 
 class SentencePreprocessor:
     """
@@ -179,8 +177,6 @@ class SentencePreprocessor:
         self._stop_words = stop_words
         self._punctuation = punctuation
 
-        return None
-
     def __str__(self) -> str:
         """
         Returns a string representation of the preprocessor.
@@ -188,7 +184,8 @@ class SentencePreprocessor:
         Returns:
             str: String representation of the preprocessor.
         """
-        return f"SentencePreprocessor(stop_words={len(self._stop_words)}, punctuation={len(self._punctuation)})"
+        return f"""SentencePreprocessor(stop_words={len(self._stop_words)},
+        punctuation={len(self._punctuation)})"""
 
     def _clean_and_tokenize(self, text: str) -> tuple[str, ...]:
         """
@@ -270,7 +267,9 @@ class SentencePreprocessor:
         for punc in [". ", "? ", "! "]:
             preprocess_text = preprocess_text.replace(punc, f"{punc}~ ")
 
-        return tuple(Sentence(i.strip(), position) for position, i in enumerate(preprocess_text.split("~ ")))
+        return tuple(Sentence(i.strip(), position)
+                    for position, i
+                    in enumerate(preprocess_text.split("~ ")))
 
     def get_sentences(self, text: str) -> tuple[Sentence, ...]:
         """
@@ -323,7 +322,6 @@ class SentenceEncoder:
         self._id2word = {}
         self.last = 999
 
-
     def __str__(self) -> str:
         """
         Returns a string representation of the encoder.
@@ -331,7 +329,7 @@ class SentenceEncoder:
         Returns:
             str: String representation of the encoder.
         """
-
+        return f"SentenceEncoder(vocabulary_size={len(self._word2id)})"
 
     def _learn_indices(self, tokens: Sequence[str]) -> None:
         """
@@ -387,7 +385,8 @@ def calculate_similarity(sequence: Sequence, other_sequence: Sequence) -> float:
         raise IncorrectArgumentError("Incorrect input value")
     if not all([sequence, other_sequence]):
         return 0.0
-    return float(len((set(sequence) & set(other_sequence))) / len((set(sequence) | set(other_sequence))))
+    return float(len((set(sequence) & set(other_sequence))) /
+                len((set(sequence) | set(other_sequence))))
 
 
 class TextGraph:
@@ -492,7 +491,7 @@ class TextGraph:
             for second_index in range(index + 1, len(self._vertices)):
                 self._add_edge(vertex, self._vertices[second_index])
 
-        for i in range(len(self._matrix)):
+        for i, _ in enumerate(self._matrix):
             self._matrix[i][i] = 1.0
 
     def calculate_inout_score(self, vertex: Sentence) -> int:
@@ -535,7 +534,7 @@ class TextGraph:
 
         index1 = self._vertices.index(vertex1)
         index2 = self._vertices.index(vertex2)
-        return self._matrix[index1][index2]
+        return float(self._matrix[index1][index2])
 
     def get_top_n_sentences(self, n: int) -> tuple[Sentence, ...]:
         """
@@ -562,10 +561,11 @@ class TextGraph:
             corpus_of_similarities[idx] = summ
 
         corpus_of_best_sentences = []
-        corpus_of_similar = zip(corpus_of_similarities.keys(), corpus_of_similarities.values())
-        corpus_of_similarities = sorted(corpus_of_similar, key=lambda x: -x[1])
+        corpus_of_similar = list(zip(corpus_of_similarities.keys(),
+                                    corpus_of_similarities.values()))
+        corpus_of_similar = sorted(corpus_of_similar, key=lambda x: -x[1])
 
-        for pair in corpus_of_similarities[:n]:
+        for pair in corpus_of_similar[:n]:
             corpus_of_best_sentences.append(self._vertices[pair[0]])
         return tuple(corpus_of_best_sentences)
 

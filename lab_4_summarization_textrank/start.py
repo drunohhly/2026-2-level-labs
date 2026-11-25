@@ -32,7 +32,8 @@ def main() -> None:
     encoder = SentenceEncoder()
     encoder.encode_sentences(result)
     for index, sentence in enumerate(result, 1):
-        print(f"{index}. Sentence: {sentence.get_text()}\nEncoded sentence: {sentence.get_encoded()}")
+        print(f"""{index}. Sentence: {sentence.get_text()}
+            \nEncoded sentence: {sentence.get_encoded()}""")
 
     graph = TextGraph()
     graph.build(result)
