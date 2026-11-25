@@ -184,7 +184,7 @@ class SentencePreprocessor:
         Returns:
             str: String representation of the preprocessor.
         """
-        return (f"SentencePreprocessor(stop_words={len(self._stop_words)},"
+        return (f"SentencePreprocessor(stop_words={len(self._stop_words)}, "
                 f"punctuation={len(self._punctuation)})")
 
     def _clean_and_tokenize(self, text: str) -> tuple[str, ...]:
@@ -686,7 +686,7 @@ class TextRankSummarizer(NaiveSummarizer):
         Returns:
             int: Number of vertices in the graph.
         """
-        return len(self._graph.get_vertices())
+        return len(self._scores)
 
     def __str__(self) -> str:
         """
@@ -695,12 +695,10 @@ class TextRankSummarizer(NaiveSummarizer):
         Returns:
             str: String representation of the TextRank summarizer.
         """
-        return f"""TextRankSummarizer(
-                    graph=TextGraph(vertices={len(self)}),\n
-                    damping_factor={self._damping_factor},\n
-                    convergence_threshold={self._convergence_threshold},\n
-                    max_iter={self._max_iter}\n
-                    )"""
+        return (f"TextRankSummarizer(graph=TextGraph(vertices={len(self)}), "
+                f"damping_factor={self._damping_factor}, "
+                f"convergence_threshold={self._convergence_threshold}, "
+                f"max_iter={self._max_iter})")
 
     def _get_top_n_sentences(self, n: int) -> tuple[Sentence, ...]:
         """
