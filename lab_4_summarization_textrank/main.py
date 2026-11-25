@@ -366,6 +366,7 @@ class SentenceEncoder:
 
         for sentence in sentences:
             tokens = sentence.get_preprocessed()
+
             self._learn_indices(tokens)
 
             sentence.set_encoded(tuple(self._word2id[token] for token in tokens))
