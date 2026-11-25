@@ -8,6 +8,7 @@ from lab_4_summarization_textrank.main import (
     SentenceEncoder,
     SentencePreprocessor,
     TextGraph,
+    TextRankSummarizer,
 )
 
 
@@ -38,8 +39,12 @@ def main() -> None:
     graph = TextGraph()
     graph.build(result)
 
-    summuriser = NaiveSummarizer(graph)
-    print (f"Summary: {summuriser.summarize(5)}")
+    summuriser_naive = NaiveSummarizer(graph)
+    summuriser_text_rank= TextRankSummarizer(graph)
+    summuriser_text_rank.train()
+
+    for idx, algorythm in enumerate((summuriser_naive, summuriser_text_rank), 1):
+        print (f"{idx}. Summary: {algorythm.summarize(5)}")
     assert result
 
 

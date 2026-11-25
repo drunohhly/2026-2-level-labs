@@ -504,6 +504,18 @@ class TextGraph:
         Returns:
             int: Number of similar vertices.
         """
+        if not isinstance(vertex, Sentence):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        if vertex not in self._vertices:
+            raise TextGraphError("No such vertex found")
+
+        index = self._vertices.index(vertex)
+        summ = []
+        for idx, similarity in enumerate(self._matrix[index]):
+            if similarity and index != idx:
+                summ.append(similarity)
+        return len(summ)
 
     def get_vertices(self) -> tuple[Sentence, ...]:
         """
@@ -661,6 +673,11 @@ class TextRankSummarizer(NaiveSummarizer):
         Args:
             graph (TextGraph): Built graph of encoded sentences.
         """
+        super().__init__(graph)
+        self._damping_factor = 0.85
+        self._convergence_threshold = 0.0001
+        self._max_iter = 50
+        self._scores = {}
 
     def __len__(self) -> int:
         """
@@ -669,6 +686,7 @@ class TextRankSummarizer(NaiveSummarizer):
         Returns:
             int: Number of vertices in the graph.
         """
+        return len(self._graph.get_vertices())
 
     def __str__(self) -> str:
         """
@@ -677,6 +695,12 @@ class TextRankSummarizer(NaiveSummarizer):
         Returns:
             str: String representation of the TextRank summarizer.
         """
+        return f"""TextRankSummarizer(
+                    graph=TextGraph(vertices={len(self)}),\n
+                    damping_factor={self._damping_factor},\n
+                    convergence_threshold={self._convergence_threshold},\n
+                    max_iter={self._max_iter}\n
+                    )"""
 
     def _get_top_n_sentences(self, n: int) -> tuple[Sentence, ...]:
         """
@@ -688,6 +712,14 @@ class TextRankSummarizer(NaiveSummarizer):
         Returns:
             tuple[Sentence, ...]: Top n sentences with the highest significance scores.
         """
+        if not isinstance(n, int):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        if not n > 0:
+            raise IncorrectArgumentError("Incorrect input value")
+
+        sent = sorted(zip(self._scores.keys(), self._scores.values()), key=lambda x: -x[1])
+        return tuple(s[0] for s in sent[:n])
 
     def _update_vertex_score(
         self,
@@ -703,8 +735,49 @@ class TextRankSummarizer(NaiveSummarizer):
             incidental_vertices (Sequence[Sentence]): Vertices related to the sentence.
             current_scores (dict[Sentence, float]): Current scores of all vertices.
         """
+        if not all([isinstance(vertex, Sentence),
+                    isinstance(incidental_vertices, Sequence),
+                    isinstance(current_scores, dict)]):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        if not all([current_scores,
+                    all(isinstance(s, Sentence) for s in incidental_vertices),
+                    all(isinstance(k, Sentence) for k in current_scores.keys()),
+                    all(isinstance(v, float) for v in current_scores.values())]):
+            raise IncorrectArgumentError("Incorrect input value")
+
+        summ = 0.0
+        for incent_vert in incidental_vertices:
+            adjacent_edges = self._graph.calculate_inout_score(incent_vert)
+            if adjacent_edges:
+                summ += current_scores[incent_vert] / adjacent_edges
+
+        self._scores[vertex] = (1 - self._damping_factor) + self._damping_factor * summ
 
     def train(self) -> None:
         """
         Iteratively calculates significance scores for all vertices until convergence.
         """
+        vertices = self._graph.get_vertices()
+        for vert in vertices:
+            self._scores[vert] = 1.0
+
+        for _ in range(self._max_iter):
+            prev_score = self._scores.copy()
+            for vertic in vertices:
+                adj_edjes = []
+                for next_vertic in vertices:
+                    if vertic == next_vertic:
+                        continue
+                    if self._graph.get_similarity_score(vertic, next_vertic) <= 0:
+                        continue
+                    adj_edjes.append(next_vertic)
+                self._update_vertex_score(vertic, adj_edjes, prev_score)
+
+            summ = 0.0
+            for v in vertices:
+                diff = abs(prev_score[v] - self._scores[v])
+                summ += diff
+
+            if summ <= self._convergence_threshold:
+                break
